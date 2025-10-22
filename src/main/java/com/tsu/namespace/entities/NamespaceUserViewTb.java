@@ -3,7 +3,6 @@ package com.tsu.namespace.entities;
 import com.tsu.namespace.api.NamespaceUserType;
 import com.tsu.common.jpa.Jsonb;
 import com.tsu.common.jpa.JsonbType;
-import com.tsu.workspace.api.SecurityClass;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
