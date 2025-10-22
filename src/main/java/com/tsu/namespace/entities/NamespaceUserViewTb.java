@@ -47,10 +47,6 @@ public class NamespaceUserViewTb {
     @Column(name = "type", nullable = false)
     private NamespaceUserType type;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "security_level", nullable = false)
-    private SecurityClass securityLevel;
-
     @Type(JsonbType.class)
     @Column(name = "permissions", columnDefinition = "jsonb")
     private Jsonb permissions;

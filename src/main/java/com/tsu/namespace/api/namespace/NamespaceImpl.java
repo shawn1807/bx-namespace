@@ -247,7 +247,6 @@ public class NamespaceImpl implements Namespace {
                         tb.getRole(),
                         tb.getDisplayName(),
                         tb.getType(),
-                        tb.getSecurityLevel(),
                         tb.isActive(),
                         tb.getActivationDate(),
                         tb.getExpirationDate(),
