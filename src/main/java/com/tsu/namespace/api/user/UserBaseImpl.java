@@ -1,16 +1,5 @@
 package com.tsu.namespace.api.user;
 
-import com.tsu.namespace.api.Formatter;
-import com.tsu.namespace.api.Login;
-import com.tsu.base.api.UserBase;
-import com.tsu.namespace.api.UserProfile;
-import com.tsu.base.enums.BaseConstants;
-import com.tsu.base.enums.BaseParamName;
-import com.tsu.namespace.helper.NamespaceDbHelper;
-import com.tsu.namespace.record.NamespaceRecord;
-import com.tsu.namespace.record.UserRecord;
-import com.tsu.base.val.NamespaceVal;
-import com.tsu.base.val.UserVal;
 import com.tsu.common.exception.PermissionDeniedException;
 import com.tsu.common.jpa.JsonValueUtils;
 import com.tsu.common.utils.LazyCacheLoader;
@@ -20,7 +9,18 @@ import com.tsu.common.vo.Text;
 import com.tsu.entry.api.AclMode;
 import com.tsu.entry.api.EntryBucket;
 import com.tsu.entry.service.BucketService;
-import com.tsu.security.AppSecurityContext;
+import com.tsu.auth.security.AppSecurityContext;
+import com.tsu.enums.BaseConstants;
+import com.tsu.enums.BaseParamName;
+import com.tsu.namespace.helper.NamespaceDbHelper;
+import com.tsu.namespace.record.NamespaceRecord;
+import com.tsu.namespace.record.UserRecord;
+import com.tsu.workspace.api.Formatter;
+import com.tsu.auth.api.Login;
+import com.tsu.namespace.api.UserBase;
+import com.tsu.namespace.api.UserProfile;
+import com.tsu.namespace.val.NamespaceVal;
+import com.tsu.common.val.UserVal;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 

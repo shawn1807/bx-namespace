@@ -1,13 +1,12 @@
 package com.tsu.namespace.record;
 
-import com.tsu.base.api.NamespaceUserType;
-import com.tsu.namespace.api.SecurityClass;
-import com.tsu.namespace.entities.NamespaceRoleTb;
-import com.tsu.namespace.entities.NamespaceUserTb;
-import com.tsu.base.val.NamespaceUserVal;
-import com.tsu.common.api.BasePrincipal;
+import com.tsu.auth.api.BasePrincipal;
 import com.tsu.common.api.Entry;
 import com.tsu.common.jpa.JsonValueUtils;
+import com.tsu.namespace.api.NamespaceUserType;
+import com.tsu.namespace.entities.NamespaceRoleTb;
+import com.tsu.namespace.entities.NamespaceUserTb;
+import com.tsu.namespace.val.NamespaceUserVal;
 import lombok.RequiredArgsConstructor;
 
 import java.lang.reflect.Type;
@@ -29,9 +28,6 @@ public class NamespaceUserRecord {
         persist.accept(tb);
     }
 
-    public SecurityClass getSecurityClass(){
-        return tb.getSecurityLevel();
-    }
     public NamespaceUserVal getValue() {
         return new NamespaceUserVal(getId(), getUser(), isActive(), getActivationDate(), getExpirationDate(),
                 getCreatedBy(), getCreatedDate(), getModifiedBy(), getModifiedDate());
@@ -87,10 +83,6 @@ public class NamespaceUserRecord {
         tb.setActive(active);
     }
 
-    public void setEntry(Entry entry) {
-        if (entry != null)
-            tb.setEntryId(entry.getId());
-    }
 
     public void setApprovedDate(LocalDateTime approvedDate) {
         tb.setApprovedDate(approvedDate);

@@ -1,7 +1,7 @@
 package com.tsu.namespace.record;
 
 import com.tsu.namespace.entities.NamespaceRoleTb;
-import com.tsu.base.val.NamespaceRoleVal;
+import com.tsu.namespace.val.NamespaceRoleVal;
 import com.tsu.common.jpa.JsonValueUtils;
 import lombok.RequiredArgsConstructor;
 
@@ -25,11 +25,11 @@ public class NamespaceRoleRecord {
     }
 
     public UUID getNamespaceId() {
-        return tb.getNamespaceId();
+        return tb.getId().getNamespaceId();
     }
 
     public Integer getId() {
-        return tb.getId();
+        return tb.getId().getId();
     }
 
 

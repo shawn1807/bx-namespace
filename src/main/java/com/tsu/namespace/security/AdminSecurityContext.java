@@ -1,6 +1,6 @@
 package com.tsu.namespace.security;
 
-import com.tsu.security.AppSecurityContext;
+import com.tsu.auth.security.AppSecurityContext;
 
 public interface AdminSecurityContext extends AppSecurityContext {
 

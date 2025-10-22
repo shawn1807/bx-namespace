@@ -2,10 +2,10 @@ package com.tsu.namespace.record;
 
 import com.tsu.namespace.api.UserProfile;
 import com.tsu.namespace.entities.UserBaseTb;
-import com.tsu.base.val.UserVal;
+import com.tsu.common.val.UserVal;
 import com.tsu.common.jpa.JsonValueUtils;
 import com.tsu.common.utils.ValueObserver;
-import com.tsu.security.AppSecurityContext;
+import com.tsu.auth.security.AppSecurityContext;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 

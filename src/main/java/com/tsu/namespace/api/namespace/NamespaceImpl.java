@@ -1,33 +1,34 @@
 package com.tsu.namespace.api.namespace;
 
+import com.tsu.auth.api.AccessLevel;
+import com.tsu.auth.api.BasePrincipal;
+import com.tsu.auth.api.PermissionManager;
+import com.tsu.auth.permissions.NamespaceAction;
+import com.tsu.auth.security.AppSecurityContext;
+import com.tsu.auth.security.NamespaceContext;
+import com.tsu.common.api.ActionPack;
+import com.tsu.common.api.EntryMetadataManager;
+import com.tsu.common.api.MetadataManager;
+import com.tsu.common.utils.LazyCacheLoader;
+import com.tsu.common.utils.ParamValidator;
+import com.tsu.common.vo.Text;
+import com.tsu.entry.api.EntryBucket;
+import com.tsu.entry.api.EntryTextManager;
+import com.tsu.entry.api.Node;
+import com.tsu.entry.service.BucketService;
+import com.tsu.enums.BaseParamName;
 import com.tsu.namespace.api.*;
 import com.tsu.namespace.api.manager.*;
-import com.tsu.namespace.entities.NamespaceUserViewTb;
-import com.tsu.base.enums.AccessLevel;
-import com.tsu.base.enums.BaseCustomType;
-import com.tsu.base.enums.BaseParamName;
-import com.tsu.base.enums.NamespaceAction;
-import com.tsu.base.request.UserFilter;
 import com.tsu.namespace.helper.*;
 import com.tsu.namespace.record.NamespaceRecord;
 import com.tsu.namespace.record.NamespaceRoleRecord;
 import com.tsu.namespace.record.NamespaceUserRecord;
 import com.tsu.namespace.security.NamespaceContextImpl;
-import com.tsu.base.service.IDGeneratorService;
-import com.tsu.base.val.NamespaceRoleVal;
-import com.tsu.base.val.NamespaceUserMvVal;
-import com.tsu.base.val.NamespaceVal;
-import com.tsu.base.val.SubscriptionPlanVal;
-import com.tsu.common.api.ActionPack;
-import com.tsu.common.api.BasePrincipal;
-import com.tsu.common.utils.LazyCacheLoader;
-import com.tsu.common.utils.ParamValidator;
-import com.tsu.common.vo.Text;
-import com.tsu.entry.api.EntryBucket;
-import com.tsu.entry.api.Node;
-import com.tsu.entry.service.BucketService;
-import com.tsu.security.AppSecurityContext;
-import com.tsu.security.NamespaceContext;
+import com.tsu.namespace.service.IDGeneratorService;
+import com.tsu.namespace.val.*;
+import com.tsu.place.api.PlaceManager;
+import com.tsu.workspace.api.TextManager;
+import com.tsu.workspace.request.UserFilter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -46,51 +47,44 @@ public class NamespaceImpl implements Namespace {
     @ToString.Include
     private final NamespaceRecord value;
     private final LazyCacheLoader<EntryBucket> bucket;
-    private final LazyCacheLoader<Workspace> primaryWorkspace;
     private final LazyCacheLoader<CalendarManager> calendarManager;
     private final LazyCacheLoader<PlaceManager> placeManager;
     private final PermissionManager permissionManager;
     private final NamespaceDbHelper namespaceDbHelper;
     private final LazyCacheLoader<MetadataManager> metadataManager;
     private final LazyCacheLoader<EntityManager> entityManager;
-    private final LazyCacheLoader<WorkspaceManager> workspaceManager;
     private final LazyCacheLoader<NumberManager> numberManager;
     private final LazyCacheLoader<TextManager> textManager;
     private final LazyCacheLoader<NamespaceUsers> namespaceUsers;
     private final AppSecurityContext context;
-    private final DomainObjectBuilder builder;
+    private final NamespaceObjectFactory factory;
     private final NamespaceContext namespaceContext;
 
 
     public NamespaceImpl(AppSecurityContext context, NamespaceUser user, NamespaceRecord value, NamespaceDbHelper namespaceDbHelper,
-                         WorkspaceDbHelper workspaceDatabaseHelper, EntityDbHelper entityDbHelper, WorkDbHelper taskDbHelper,
+                         EntityDbHelper entityDbHelper,
                          NumberDbHelper numberDbHelper, BucketService bucketService,
-                         PlaceDbHelper placeDbHelper, DocumentDbHelper documentDbHelper,
+                         PlaceDbHelper placeDbHelper,
                          SubscriptionDbHelper subscriptionDbHelper, AppDbHelper appDbHelper, IDGeneratorService idGeneratorService,
-                         DomainObjectBuilder builder) {
+                         NamespaceObjectFactory factory) {
         this.value = value;
         this.namespaceDbHelper = namespaceDbHelper;
         this.context = context;
-        this.builder = builder;
+        this.factory = factory;
         this.bucket = LazyCacheLoader.of(() -> bucketService.findBucket(value.getBucket(), context.getBucketContext())
-                .orElseThrow(() -> new IllegalStateException("bucket not exists"))
-        );
-        this.primaryWorkspace = LazyCacheLoader.of(() -> getWorkspaceManager().findWorkspaceById(value.getPrimaryWorkspaceId())
                 .orElseThrow(() -> new IllegalStateException("bucket not exists"))
         );
 
         this.metadataManager = LazyCacheLoader.of(() -> new EntryMetadataManager(this));
         this.namespaceContext = new NamespaceContextImpl(context, user);
-        this.numberManager = LazyCacheLoader.of(() -> new NamespaceNumberManager(namespaceContext, numberDbHelper, builder));
+        this.numberManager = LazyCacheLoader.of(() -> new NamespaceNumberManager(namespaceContext, numberDbHelper, factory));
         this.entityManager = LazyCacheLoader.of(() -> new NamespaceEntityManager(namespaceContext,
-                entityDbHelper, builder));
-        this.permissionManager = new NamespacePermissionManager(namespaceContext, appDbHelper, builder);
-        this.placeManager = LazyCacheLoader.of(() -> new NamespacePlaceManager(this, context, placeDbHelper, builder));
+                entityDbHelper, factory));
+        this.permissionManager = new NamespacePermissionManager(namespaceContext, appDbHelper);
+        this.placeManager = LazyCacheLoader.of(() -> new NamespacePlaceManager(this, context, placeDbHelper, factory));
         this.calendarManager = LazyCacheLoader.of(() -> new NamespaceCalendarManager(this, context));
         this.textManager = LazyCacheLoader.of(() -> new EntryTextManager(bucket.get().getRoot(), permissionManager));
-        this.workspaceManager = LazyCacheLoader.of(() -> new NamespaceWorkspaceManager(namespaceContext, workspaceDatabaseHelper, taskDbHelper,
-                documentDbHelper, idGeneratorService, builder));
-        this.namespaceUsers = LazyCacheLoader.of(() -> new CachedNamespaceUsers(namespaceDbHelper.findNamespaceJoinedUserInfoByNamespaceId(value.getId())));
+        this.namespaceUsers = LazyCacheLoader.of(() -> new CachedNamespaceUsers(namespaceDbHelper.findNamespaceJoinedUserInfoByNamespaceId(value.getId()).toList()));
     }
 
 
@@ -112,17 +106,6 @@ public class NamespaceImpl implements Namespace {
     @Override
     public PermissionManager getPermissionManager() {
         return permissionManager;
-    }
-
-    @Override
-    public WorkspaceManager getWorkspaceManager() {
-        return workspaceManager.get();
-    }
-
-
-    @Override
-    public Workspace getPrimaryWorkspace() {
-        return primaryWorkspace.get();
     }
 
     @Override
@@ -201,19 +184,19 @@ public class NamespaceImpl implements Namespace {
     @Override
     public Optional<NamespaceUser> findUser(BasePrincipal user) {
         return namespaceDbHelper.findNamespaceUserByNamespaceIdAndPrincipalId(getId(), user.id(), context)
-                .map(r -> builder.build(value, r, context));
+                .map(r -> factory.build(value, r, context));
     }
 
     @Override
     public Stream<NamespaceUser> findUsers() {
         return namespaceDbHelper.findNamespaceUserByNamespaceId(getId(), namespaceContext)
-                .map(r -> builder.build(value, r, context));
+                .map(r -> factory.build(value, r, context));
     }
 
     @Override
     public Stream<NamespaceUser> findUsers(NamespaceUserType type) {
         return namespaceDbHelper.findNamespaceUserByNamespaceIdAndType(getId(), type, namespaceContext)
-                .map(r -> builder.build(value, r, context));
+                .map(r -> factory.build(value, r, context));
     }
 
     @Override
@@ -230,23 +213,21 @@ public class NamespaceImpl implements Namespace {
         LocalDate expirationDate = null;
         BasePrincipal approvedBy = null;
         boolean active = false;
-        Long entryId = null;
-        if (accessLevel == AccessLevel.open) {
-            active = true;
-            approvedDate = LocalDateTime.now();
-            approvedBy = context.getPrincipal();
-            entryId = getBucket().addContainer(BaseCustomType.MEMBER).getId();
-        }
         NamespaceUserRecord namespaceUserRecord = namespaceDbHelper.addNamespaceUser(getId(), user, user.getValue().displayName(), type,
-                active, approvedDate, approvedBy, entryId, SecurityClass.U, expirationDate, context);
-        return builder.build(value, namespaceUserRecord, context);
+                active, approvedDate, approvedBy, expirationDate, context);
+        return factory.build(value, namespaceUserRecord, context);
     }
 
     @Override
     public Optional<NamespaceUser> findUserById(Integer userId) {
         return namespaceDbHelper.findNamespaceUserByNamespaceIdAndId(getId(), userId, namespaceContext)
-                .map(user -> builder.build(value, user, context));
+                .map(user -> factory.build(value, user, context));
 
+    }
+
+    @Override
+    public Optional<NamespaceRole> findRoleById(Integer roleId) {
+        return Optional.empty();
     }
 
     @Override
@@ -267,15 +248,14 @@ public class NamespaceImpl implements Namespace {
                         tb.getDisplayName(),
                         tb.getType(),
                         tb.getSecurityLevel(),
-                        tb.getPermissions(),
                         tb.isActive(),
                         tb.getActivationDate(),
                         tb.getExpirationDate(),
-                        tb.getApprovedBy(),
+                        users.find(tb.getApprovedBy()).orElse(NspUsrVal.EMPTY).toDisplay(),
                         tb.getApprovedDate(),
-                        tb.getCreatedBy(),
+                        users.find(tb.getCreatedBy()).orElse(NspUsrVal.EMPTY).toDisplay(),
                         tb.getCreatedDate(),
-                        tb.getModifiedBy(),
+                        users.find(tb.getModifiedBy()).orElse(NspUsrVal.EMPTY).toDisplay(),
                         tb.getModifiedDate(),
                         tb.getFirstName(),
                         tb.getLastName(),

@@ -1,13 +1,14 @@
 package com.tsu.namespace.security;
 
-import com.tsu.base.api.UserBase;
-import com.tsu.namespace.api.namespace.DomainObjectBuilder;
-import com.tsu.namespace.record.LoginRecord;
-import com.tsu.namespace.record.UserRecord;
-import com.tsu.common.api.BasePrincipal;
+import com.tsu.auth.api.BasePrincipal;
 import com.tsu.common.utils.LazyCacheLoader;
 import com.tsu.entry.api.BucketContext;
-import com.tsu.security.AppSecurityContext;
+import com.tsu.auth.security.AppSecurityContext;
+import com.tsu.namespace.api.UserBase;
+import com.tsu.auth.security.AppJwtAuthenticationToken;
+import com.tsu.namespace.api.namespace.NamespaceObjectFactory;
+import com.tsu.namespace.record.LoginRecord;
+import com.tsu.namespace.record.UserRecord;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,10 +29,11 @@ public class WebAppSecurityContext implements AppSecurityContext {
     private final LazyCacheLoader<List<GrantedAuthority>> authorities;
     private final HttpServletRequest request;
 
-    public WebAppSecurityContext(HttpServletRequest request, UserRecord userRecord, LoginRecord loginRecord, AppJwtAuthenticationToken authenticationToken, String txid, DomainObjectBuilder builder) {
+    public WebAppSecurityContext(HttpServletRequest request, UserRecord userRecord, LoginRecord loginRecord,
+                                 AppJwtAuthenticationToken authenticationToken, String txid, NamespaceObjectFactory factory) {
         this.request = request;
         this.loginRecord = loginRecord;
-        this.userBase = builder.build(userRecord, this);
+        this.userBase = factory.build(userRecord, this);
         this.authenticationToken = authenticationToken;
         this.txid = txid;
         this.authorities = LazyCacheLoader.of(() -> authenticationToken.getAuthorities() //

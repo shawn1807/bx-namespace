@@ -1,10 +1,10 @@
 package com.tsu.namespace.service.impl;
 
-import com.tsu.base.api.Place;
 import com.tsu.namespace.helper.PlaceDbHelper;
 import com.tsu.namespace.record.PlaceRecord;
-import com.tsu.common.api.PlaceService;
-import com.tsu.security.AppSecurityContext;
+import com.tsu.place.api.PlaceService;
+import com.tsu.auth.security.AppSecurityContext;
+import com.tsu.place.api.Place;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -46,8 +46,8 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     public PlaceRecord addPlace(String country, String county, String city, String building,
-                               String address, String postCode, double lat, double lng,
-                               String notes, Object props, AppSecurityContext context) {
+                                String address, String postCode, double lat, double lng,
+                                String notes, Object props, AppSecurityContext context) {
         log.info("Creating new place: {} {} {}", country, city, address);
 
         return placeDbHelper.addPlace(country, county, city, building, address, postCode,

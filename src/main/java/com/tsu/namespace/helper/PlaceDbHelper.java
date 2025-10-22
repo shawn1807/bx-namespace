@@ -4,7 +4,7 @@ import com.tsu.namespace.entities.PlaceTb;
 import com.tsu.namespace.record.PlaceRecord;
 import com.tsu.namespace.repo.PlaceRepository;
 import com.tsu.common.jpa.JsonValueUtils;
-import com.tsu.security.AppSecurityContext;
+import com.tsu.auth.security.AppSecurityContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;

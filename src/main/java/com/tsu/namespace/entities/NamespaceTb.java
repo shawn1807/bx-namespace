@@ -1,6 +1,6 @@
 package com.tsu.namespace.entities;
 
-import com.tsu.base.enums.AccessLevel;
+import com.tsu.auth.api.AccessLevel;
 import com.tsu.common.jpa.Jsonb;
 import com.tsu.common.jpa.JsonbType;
 import jakarta.persistence.Column;
@@ -32,9 +32,6 @@ public class NamespaceTb {
 
     @Column(name = "uri", nullable = false)
     private String uri;
-
-    @Column(name = "primary_workspace_id")
-    private UUID primaryWorkspaceId;
 
     @Column(name = "owner_id", nullable = false)
     private UUID ownerId;

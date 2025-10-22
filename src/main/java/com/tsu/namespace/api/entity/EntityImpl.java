@@ -1,17 +1,19 @@
 package com.tsu.namespace.api.entity;
 
-import com.tsu.namespace.api.*;
-import com.tsu.namespace.api.manager.EntryTextManager;
-import com.tsu.namespace.api.namespace.DomainObjectBuilder;
-import com.tsu.base.enums.*;
+import com.tsu.auth.permissions.NamespaceAction;
+import com.tsu.entry.api.EntryTextManager;
+import com.tsu.enums.BaseExceptionCode;
+import com.tsu.enums.BaseParamName;
+import com.tsu.namespace.api.Entity;
+import com.tsu.namespace.api.Namespace;
+import com.tsu.namespace.api.namespace.NamespaceObjectFactory;
 import com.tsu.namespace.helper.EntityDbHelper;
-import com.tsu.namespace.helper.WorkspaceDbHelper;
 import com.tsu.namespace.record.EntityRecord;
 import com.tsu.namespace.record.EntityTypeRecord;
-import com.tsu.namespace.record.WorkspaceRecord;
-import com.tsu.namespace.record.WorkspaceTypeRecord;
-import com.tsu.base.val.EntityTypeVal;
-import com.tsu.base.val.EntityVal;
+import com.tsu.place.api.Place;
+import com.tsu.workspace.api.TextManager;
+import com.tsu.workspace.val.EntityTypeVal;
+import com.tsu.workspace.val.EntityVal;
 import com.tsu.common.api.ActionPack;
 import com.tsu.common.exception.UserException;
 import com.tsu.common.utils.LazyCacheLoader;
@@ -19,8 +21,7 @@ import com.tsu.common.utils.ParamValidator;
 import com.tsu.common.vo.Email;
 import com.tsu.common.vo.Text;
 import com.tsu.entry.api.Node;
-import com.tsu.security.AppSecurityContext;
-import com.tsu.security.NamespaceContext;
+import com.tsu.auth.security.NamespaceContext;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,19 +39,17 @@ public class EntityImpl implements Entity {
     @EqualsAndHashCode.Include
     private final EntityRecord record;
     private final EntityDbHelper dbHelper;
-    private final WorkspaceDbHelper workspaceDbHelper;
     private final NamespaceContext context;
-    private final DomainObjectBuilder builder;
+    private final NamespaceObjectFactory factory;
     private final LazyCacheLoader<TextManager> textManager;
 
     public EntityImpl(Namespace namespace, EntityRecord record, EntityDbHelper dbHelper,
-                      WorkspaceDbHelper workspaceDbHelper, NamespaceContext context, DomainObjectBuilder builder) {
+                      NamespaceContext context, NamespaceObjectFactory factory) {
         this.namespace = namespace;
         this.record = record;
         this.dbHelper = dbHelper;
-        this.workspaceDbHelper = workspaceDbHelper;
         this.context = context;
-        this.builder = builder;
+        this.factory = factory;
         this.textManager = LazyCacheLoader.of(() -> new EntryTextManager(getNode(), namespace.getPermissionManager()));
     }
 
@@ -91,13 +90,6 @@ public class EntityImpl implements Entity {
     @Override
     public Namespace getNamespace() {
         return namespace;
-    }
-
-    @Override
-    public Workspace getPrimaryWorkspace() {
-        WorkspaceManager manager = namespace.getWorkspaceManager();
-        return manager.findWorkspaceById(getId())
-                .orElseThrow(()-> new UserException(BaseExceptionCode.MISSING_WORKSPACE));
     }
 
     @Override
@@ -150,7 +142,7 @@ public class EntityImpl implements Entity {
     public Optional<Entity> getParent() {
         return Optional.ofNullable(record.getParentId())//
                 .flatMap(pid -> dbHelper.findEntityByNamespaceIdAndId(namespace.getId(), pid,context))//
-                .map(e -> builder.build(namespace, e, this.context));
+                .map(e -> factory.build(namespace, e, this.context));
     }
 
 

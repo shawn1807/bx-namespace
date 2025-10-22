@@ -1,10 +1,8 @@
 package com.tsu.namespace.entities;
 
-import com.tsu.base.api.NamespaceUserType;
-import com.tsu.namespace.api.SecurityClass;
-import com.tsu.namespace.entities.id.NamespaceRoleId;
+import com.tsu.namespace.api.NamespaceUserType;
 import com.tsu.namespace.entities.id.NamespaceUserId;
-import com.tsu.base.val.NspUsrVal;
+import com.tsu.namespace.val.NspUsrVal;
 import com.tsu.common.jpa.Jsonb;
 import com.tsu.common.jpa.JsonbType;
 import jakarta.persistence.*;
@@ -62,13 +60,6 @@ public class NamespaceUserTb {
     @Type(JsonbType.class)
     @Column(name = "permissions", columnDefinition = "jsonb")
     private Jsonb permissions;
-
-    @Column(name = "entry_id")
-    private UUID entryId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "security_level", nullable = false)
-    private SecurityClass securityLevel;
 
     @Column(name = "active", nullable = false)
     private boolean active;

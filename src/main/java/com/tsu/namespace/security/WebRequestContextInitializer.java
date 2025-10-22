@@ -1,17 +1,18 @@
 package com.tsu.namespace.security;
 
-import com.tsu.namespace.api.AuthLogin;
-import com.tsu.namespace.api.namespace.DomainObjectBuilder;
-import com.tsu.base.enums.AuthProvider;
-import com.tsu.base.enums.BaseExceptionCode;
+import com.tsu.common.exception.UserException;
+import com.tsu.common.utils.LazyCacheLoader;
+import com.tsu.auth.security.AppSecurityContext;
+import com.tsu.auth.security.AppSecurityContextInitializer;
+import com.tsu.auth.api.AuthLogin;
+import com.tsu.auth.api.AuthProvider;
+import com.tsu.auth.security.AppJwtAuthenticationToken;
+import com.tsu.enums.BaseExceptionCode;
+import com.tsu.namespace.api.namespace.NamespaceObjectFactory;
 import com.tsu.namespace.helper.UserDbHelper;
 import com.tsu.namespace.record.LoginRecord;
 import com.tsu.namespace.record.UserRecord;
-import com.tsu.base.service.IDGeneratorService;
-import com.tsu.common.exception.UserException;
-import com.tsu.common.utils.LazyCacheLoader;
-import com.tsu.security.AppSecurityContext;
-import com.tsu.security.AppSecurityContextInitializer;
+import com.tsu.namespace.service.IDGeneratorService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class WebRequestContextInitializer implements AppSecurityContextInitializ
     private UserDbHelper userDbHelper;
 
     @Autowired
-    private DomainObjectBuilder builder;
+    private NamespaceObjectFactory factory;
 
     @Autowired
     private IDGeneratorService idGenerator;
@@ -87,7 +88,7 @@ public class WebRequestContextInitializer implements AppSecurityContextInitializ
                     .filter(s -> s.getExpirationDate() == null || LocalDate.now().isBefore(s.getExpirationDate()))
                     .orElseThrow(() -> new UserException(BaseExceptionCode.INACTIVE_ACCOUNT));
             String txid = idGenerator.nextUUID().toString();
-            return new WebAppSecurityContext(request, userRecord, login.get(), token, txid, builder);
+            return new WebAppSecurityContext(request, userRecord, login.get(), token, txid, factory);
         }
         throw new IllegalStateException("Authentication not supported: " + authentication);
     }

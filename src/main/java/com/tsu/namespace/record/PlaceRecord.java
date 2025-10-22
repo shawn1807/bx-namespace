@@ -1,7 +1,7 @@
 package com.tsu.namespace.record;
 
 import com.tsu.namespace.entities.PlaceTb;
-import com.tsu.base.val.PlaceVal;
+import com.tsu.common.val.PlaceVal;
 import com.tsu.common.jpa.JsonValueUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;

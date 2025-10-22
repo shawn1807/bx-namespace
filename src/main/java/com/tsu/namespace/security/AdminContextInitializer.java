@@ -1,25 +1,25 @@
 package com.tsu.namespace.security;
 
-import com.tsu.namespace.api.AuthLogin;
-import com.tsu.base.api.UserBase;
-import com.tsu.namespace.api.namespace.DomainObjectBuilder;
-import com.tsu.base.enums.BaseConstants;
-import com.tsu.namespace.helper.NamespaceDbHelper;
-import com.tsu.namespace.record.NamespaceRecord;
-import com.tsu.base.service.IDGeneratorService;
-import com.tsu.base.val.NamespaceVal;
-import com.tsu.common.api.BasePrincipal;
+import com.tsu.auth.api.BasePrincipal;
 import com.tsu.entry.api.BucketContext;
 import com.tsu.entry.service.BucketService;
-import com.tsu.security.AppSecurityContext;
-import com.tsu.security.AppSecurityContextInitializer;
+import com.tsu.auth.security.AppSecurityContext;
+import com.tsu.auth.security.AppSecurityContextInitializer;
+import com.tsu.auth.api.AuthLogin;
+import com.tsu.enums.BaseConstants;
+import com.tsu.namespace.api.UserBase;
+import com.tsu.namespace.api.namespace.NamespaceObjectFactory;
+import com.tsu.namespace.helper.NamespaceDbHelper;
+import com.tsu.namespace.service.IDGeneratorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public class AdminContextInitializer implements AppSecurityContextInitializer {
@@ -31,10 +31,10 @@ public class AdminContextInitializer implements AppSecurityContextInitializer {
     @Autowired
     private NamespaceDbHelper namespaceDbHelper;
     @Autowired
-    private DomainObjectBuilder builder;
+    private NamespaceObjectFactory factory;
 
 
-    private com.tsu.base.security.AdminSecurityContext _adminContext;
+    private AdminSecurityContext _adminContext;
 
     public AdminContextInitializer() {
     }

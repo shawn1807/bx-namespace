@@ -1,8 +1,8 @@
 package com.tsu.namespace.config;
 
-import com.tsu.namespace.api.namespace.DomainObjectBuilder;
+import com.tsu.namespace.api.namespace.NamespaceObjectFactory;
 import com.tsu.namespace.repo.EntityRepository;
-import com.tsu.base.service.IDGeneratorService;
+import com.tsu.namespace.service.IDGeneratorService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -20,9 +20,8 @@ public class NamespaceConfig {
     }
 
     @Bean
-    public DomainObjectBuilder namespaceObjectBuilder() {
-        return new DomainObjectBuilder();
+    public NamespaceObjectFactory namespaceObjectFactory() {
+        return new NamespaceObjectFactory();
     }
 
-    // Event manager bean removed - workspace/work related beans will be in bx-base module
 }

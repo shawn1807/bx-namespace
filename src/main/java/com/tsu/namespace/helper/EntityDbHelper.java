@@ -9,7 +9,7 @@ import com.tsu.namespace.record.EntityTypeRecord;
 import com.tsu.namespace.repo.EntityRepository;
 import com.tsu.namespace.repo.EntityTypeRepository;
 import com.tsu.common.jpa.JsonValueUtils;
-import com.tsu.security.NamespaceContext;
+import com.tsu.auth.security.NamespaceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

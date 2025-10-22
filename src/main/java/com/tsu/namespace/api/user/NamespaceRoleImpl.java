@@ -1,18 +1,18 @@
 package com.tsu.namespace.api.user;
 
-import com.tsu.base.api.Namespace;
-import com.tsu.base.api.NamespaceRole;
-import com.tsu.base.enums.BaseConstants;
-import com.tsu.base.enums.NamespaceAction;
-import com.tsu.namespace.record.NamespaceRoleRecord;
-import com.tsu.namespace.util.Permissions;
-import com.tsu.base.val.NamespaceRoleVal;
-import com.tsu.base.val.PermissionVal;
 import com.tsu.common.api.ActionPack;
-import com.tsu.common.api.Permission;
-import com.tsu.common.api.PermissionEffect;
+import com.tsu.auth.api.Permission;
+import com.tsu.auth.api.PermissionEffect;
 import com.tsu.common.utils.LazyCacheLoader;
-import com.tsu.security.NamespaceContext;
+import com.tsu.auth.security.NamespaceContext;
+import com.tsu.enums.BaseConstants;
+import com.tsu.namespace.api.Namespace;
+import com.tsu.namespace.api.NamespaceRole;
+import com.tsu.auth.permissions.NamespaceAction;
+import com.tsu.namespace.record.NamespaceRoleRecord;
+import com.tsu.namespace.val.NamespaceRoleVal;
+import com.tsu.common.val.PermissionVal;
+import com.tsu.util.Permissions;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +27,11 @@ public class NamespaceRoleImpl implements NamespaceRole {
         this.record = record;
         this.context = context;
         this.helper = LazyCacheLoader.of(() -> new Permissions(record.getPermissions(BaseConstants.PERMISSION_LIST_TYPE)));
+    }
+
+    @Override
+    public Integer getId() {
+        return record.getId();
     }
 
     @Override

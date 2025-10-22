@@ -1,9 +1,9 @@
 package com.tsu.namespace.api.entity;
 
-import com.tsu.base.api.EntityType;
-import com.tsu.base.api.Namespace;
+import com.tsu.namespace.api.EntityType;
+import com.tsu.namespace.api.Namespace;
 import com.tsu.namespace.record.EntityTypeRecord;
-import com.tsu.base.val.EntityTypeVal;
+import com.tsu.workspace.val.EntityTypeVal;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;

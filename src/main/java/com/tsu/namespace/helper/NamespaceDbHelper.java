@@ -1,25 +1,24 @@
 package com.tsu.namespace.helper;
 
-import com.tsu.base.api.NamespaceUserType;
-import com.tsu.namespace.api.SecurityClass;
-import com.tsu.base.data.PermissionData;
+import com.tsu.common.data.PermissionData;
+import com.tsu.namespace.api.NamespaceUserType;
 import com.tsu.namespace.entities.NamespaceRoleTb;
 import com.tsu.namespace.entities.NamespaceTb;
 import com.tsu.namespace.entities.NamespaceUserTb;
 import com.tsu.namespace.entities.NamespaceUserViewTb;
 import com.tsu.namespace.entities.id.NamespaceRoleId;
 import com.tsu.namespace.entities.id.NamespaceUserId;
-import com.tsu.base.enums.AccessLevel;
+import com.tsu.auth.api.AccessLevel;
 import com.tsu.namespace.record.NamespaceRecord;
 import com.tsu.namespace.record.NamespaceRoleRecord;
 import com.tsu.namespace.record.NamespaceUserRecord;
 import com.tsu.namespace.repo.*;
-import com.tsu.base.request.UserFilter;
-import com.tsu.base.val.NspUsrVal;
-import com.tsu.common.api.BasePrincipal;
+import com.tsu.workspace.request.UserFilter;
+import com.tsu.namespace.val.NspUsrVal;
+import com.tsu.auth.api.BasePrincipal;
 import com.tsu.common.jpa.JsonValueUtils;
-import com.tsu.security.AppSecurityContext;
-import com.tsu.security.NamespaceContext;
+import com.tsu.auth.security.AppSecurityContext;
+import com.tsu.auth.security.NamespaceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -185,7 +184,7 @@ public class NamespaceDbHelper {
     }
 
     public NamespaceUserRecord addNamespaceUser(UUID namespaceId, BasePrincipal user, String displayName, NamespaceUserType type, boolean active,
-                                                LocalDateTime approvedDate, BasePrincipal approvedBy, UUID entryId, SecurityClass level,
+                                                LocalDateTime approvedDate, BasePrincipal approvedBy,
                                                 LocalDate expirationDate, AppSecurityContext context) {
         BasePrincipal principal = context.getPrincipal();
         NamespaceUserTb tb = new NamespaceUserTb();
@@ -198,8 +197,6 @@ public class NamespaceDbHelper {
         tb.setModifiedBy(principal.id());
         tb.setModifiedDate(LocalDateTime.now());
         tb.setType(type);
-        tb.setEntryId(entryId);
-        tb.setSecurityLevel(level);
         tb.setExpirationDate(expirationDate);
         if (approvedDate != null) {
             tb.setApprovedBy(Optional.ofNullable(approvedBy).map(BasePrincipal::id).orElse(principal.id()));

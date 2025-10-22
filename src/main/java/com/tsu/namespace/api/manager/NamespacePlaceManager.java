@@ -1,18 +1,18 @@
 package com.tsu.namespace.api.manager;
 
-import com.tsu.base.api.Namespace;
-import com.tsu.base.api.Place;
-import com.tsu.base.api.PlaceManager;
-import com.tsu.namespace.api.namespace.DomainObjectBuilder;
+import com.tsu.enums.BaseParamName;
+import com.tsu.namespace.api.Namespace;
+import com.tsu.namespace.api.namespace.NamespaceObjectFactory;
+import com.tsu.place.api.Place;
+import com.tsu.place.api.PlaceManager;
 import com.tsu.namespace.api.namespace.PlaceImpl;
-import com.tsu.base.enums.BaseParamName;
-import com.tsu.base.enums.NamespaceAction;
+import com.tsu.auth.permissions.NamespaceAction;
 import com.tsu.namespace.helper.PlaceDbHelper;
 import com.tsu.namespace.record.PlaceRecord;
-import com.tsu.base.request.AddPlace;
+import com.tsu.workspace.request.AddPlace;
 import com.tsu.common.api.ActionPack;
 import com.tsu.common.utils.ParamValidator;
-import com.tsu.security.AppSecurityContext;
+import com.tsu.auth.security.AppSecurityContext;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -24,13 +24,13 @@ public class NamespacePlaceManager implements PlaceManager {
     private final Namespace namespace;
     private final AppSecurityContext context;
     private final PlaceDbHelper dbHelper;
-    private final DomainObjectBuilder builder;
+    private final NamespaceObjectFactory factory;
 
 
-    public NamespacePlaceManager(Namespace namespace, AppSecurityContext context, PlaceDbHelper dbHelper, DomainObjectBuilder builder) {
+    public NamespacePlaceManager(Namespace namespace, AppSecurityContext context, PlaceDbHelper dbHelper, NamespaceObjectFactory factory) {
         this.namespace = namespace;
         this.context = context;
-        this.builder = builder;
+        this.factory = factory;
         this.dbHelper = dbHelper;
     }
 
@@ -52,6 +52,6 @@ public class NamespacePlaceManager implements PlaceManager {
         PlaceRecord placeRecord = dbHelper.addPlace(add.getCountry().strip(), add.getCounty(), add.getCity().strip(), add.getBuilding(),
                 add.getAddress().strip(), add.getPostCode(), add.getLat(), add.getLng(),
                 add.getNotes(), props, context);
-        return builder.build(namespace, placeRecord);
+        return factory.build(namespace, placeRecord);
     }
 }

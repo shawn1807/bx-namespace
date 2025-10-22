@@ -1,10 +1,10 @@
 package com.tsu.namespace.record;
 
-import com.tsu.namespace.entities.NamespaceTb;
-import com.tsu.base.enums.AccessLevel;
-import com.tsu.base.val.NamespaceVal;
-import com.tsu.common.api.BasePrincipal;
+import com.tsu.auth.api.AccessLevel;
+import com.tsu.auth.api.BasePrincipal;
 import com.tsu.common.jpa.JsonValueUtils;
+import com.tsu.namespace.entities.NamespaceTb;
+import com.tsu.namespace.val.NamespaceVal;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
@@ -103,10 +103,6 @@ public class NamespaceRecord {
     }
 
 
-    public UUID getPrimaryWorkspaceId() {
-        return tb.getPrimaryWorkspaceId();
-    }
-
     public <T> T getProps(Class<T> type) {
         return JsonValueUtils.getInstance().decode(tb.getProps(), type);
     }
@@ -123,7 +119,4 @@ public class NamespaceRecord {
     }
 
 
-    public void setPrimaryWorkspaceId(UUID id) {
-        tb.setPrimaryWorkspaceId(id);
-    }
 }

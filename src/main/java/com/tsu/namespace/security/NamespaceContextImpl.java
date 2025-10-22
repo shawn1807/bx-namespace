@@ -1,14 +1,11 @@
 package com.tsu.namespace.security;
 
-import com.tsu.base.api.Namespace;
-import com.tsu.base.api.NamespaceRole;
-import com.tsu.base.api.NamespaceUser;
-import com.tsu.namespace.api.WorkspaceUser;
-import com.tsu.namespace.api.namespace.DomainObjectBuilder;
-import com.tsu.namespace.helper.WorkspaceDbHelper;
-import com.tsu.common.api.BasePrincipal;
-import com.tsu.security.AppSecurityContext;
-import com.tsu.security.NamespaceContext;
+import com.tsu.auth.api.BasePrincipal;
+import com.tsu.auth.security.AppSecurityContext;
+import com.tsu.auth.security.NamespaceContext;
+import com.tsu.namespace.api.Namespace;
+import com.tsu.namespace.api.NamespaceRole;
+import com.tsu.namespace.api.NamespaceUser;
 
 import java.util.Optional;
 import java.util.UUID;

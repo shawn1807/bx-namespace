@@ -1,10 +1,10 @@
 package com.tsu.namespace.api.namespace;
 
-import com.tsu.base.api.Namespace;
-import com.tsu.base.api.Place;
-import com.tsu.base.enums.NamespaceAction;
+import com.tsu.namespace.api.Namespace;
+import com.tsu.place.api.Place;
+import com.tsu.auth.permissions.NamespaceAction;
 import com.tsu.namespace.record.PlaceRecord;
-import com.tsu.base.val.PlaceVal;
+import com.tsu.common.val.PlaceVal;
 import com.tsu.common.api.ActionPack;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;

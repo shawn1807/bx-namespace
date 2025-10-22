@@ -1,22 +1,21 @@
 package com.tsu.namespace.helper;
 
-import com.tsu.namespace.api.AuthLogin;
-import com.tsu.base.api.PrincipalType;
+import com.tsu.auth.api.AuthLogin;
+import com.tsu.common.api.PrincipalType;
 import com.tsu.namespace.entities.BasePrincipalTb;
 import com.tsu.namespace.entities.LoginTb;
 import com.tsu.namespace.entities.UserBaseTb;
-import com.tsu.base.enums.AuthProvider;
+import com.tsu.auth.api.AuthProvider;
 import com.tsu.namespace.record.LoginRecord;
 import com.tsu.namespace.record.UserRecord;
 import com.tsu.namespace.repo.BasePrincipalRepository;
 import com.tsu.namespace.repo.LoginRepository;
 import com.tsu.namespace.repo.UserBaseRepository;
-import com.tsu.base.service.IDGeneratorService;
-import com.tsu.common.api.BasePrincipal;
+import com.tsu.namespace.service.IDGeneratorService;
+import com.tsu.auth.api.BasePrincipal;
 import com.tsu.common.jpa.JsonValueUtils;
 import com.tsu.common.utils.CompositeValueObserver;
 import com.tsu.common.utils.LazyCacheLoader;
-import com.tsu.security.AppSecurityContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

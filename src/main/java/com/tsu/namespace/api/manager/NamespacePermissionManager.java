@@ -1,19 +1,17 @@
 package com.tsu.namespace.api.manager;
 
-import com.tsu.namespace.api.Document;
-import com.tsu.base.api.Namespace;
-import com.tsu.base.api.NamespaceUser;
-import com.tsu.namespace.api.PermissionManager;
-import com.tsu.namespace.api.namespace.DomainObjectBuilder;
-import com.tsu.namespace.helper.AppDbHelper;
-import com.tsu.namespace.util.Permissions;
-import com.tsu.base.val.NamespaceVal;
-import com.tsu.base.val.PermissionVal;
+import com.tsu.auth.api.BasePrincipal;
+import com.tsu.auth.api.Permission;
+import com.tsu.auth.api.PermissionManager;
+import com.tsu.auth.security.NamespaceContext;
 import com.tsu.common.api.ActionPack;
-import com.tsu.common.api.BasePrincipal;
-import com.tsu.common.api.Permission;
 import com.tsu.common.exception.PermissionDeniedException;
-import com.tsu.security.NamespaceContext;
+import com.tsu.common.val.PermissionVal;
+import com.tsu.namespace.api.Namespace;
+import com.tsu.namespace.api.NamespaceUser;
+import com.tsu.namespace.helper.AppDbHelper;
+import com.tsu.namespace.val.NamespaceVal;
+import com.tsu.util.Permissions;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -27,7 +25,7 @@ public class NamespacePermissionManager implements PermissionManager {
     private final Map<UUID, Permissions> permissions;
 
     public NamespacePermissionManager(NamespaceContext context,
-                                      AppDbHelper appDbHelper, DomainObjectBuilder builder
+                                      AppDbHelper appDbHelper
     ) {
         this.namespace = context.getNamespace();
         this.context = context;
@@ -86,11 +84,6 @@ public class NamespacePermissionManager implements PermissionManager {
         return namespace.findUser(user)
                 .map(NamespaceUser::isValid)
                 .orElse(false);
-    }
-
-    @Override
-    public boolean allowViewDocument(Document document) {
-        return false;
     }
 
 

@@ -1,8 +1,8 @@
 package com.tsu.namespace.api.user;
 
-import com.tsu.namespace.api.Formatter;
-import com.tsu.base.api.Place;
 import com.tsu.namespace.record.UserRecord;
+import com.tsu.workspace.api.Formatter;
+import com.tsu.place.api.Place;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

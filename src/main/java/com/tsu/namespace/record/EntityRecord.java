@@ -1,8 +1,7 @@
 package com.tsu.namespace.record;
 
 import com.tsu.namespace.entities.EntityTb;
-import com.tsu.base.val.EntityVal;
-import com.tsu.common.api.BasePrincipal;
+import com.tsu.workspace.val.EntityVal;
 import com.tsu.common.jpa.JsonValueUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;

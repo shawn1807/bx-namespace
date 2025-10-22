@@ -1,8 +1,7 @@
 package com.tsu.namespace.record;
 
 import com.tsu.namespace.entities.EntityTypeTb;
-import com.tsu.base.val.EntityTypeVal;
-import com.tsu.common.api.BasePrincipal;
+import com.tsu.workspace.val.EntityTypeVal;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
@@ -23,7 +22,7 @@ public class EntityTypeRecord {
 
 
     public EntityTypeVal getValue() {
-        return new EntityTypeVal(tb.getId(), tb.getName(), tb.getCreatedBy(),
+        return new EntityTypeVal(tb.getId().getId(), tb.getName(), tb.getCreatedBy(),
                 tb.getCreatedDate());
     }
 
@@ -33,6 +32,6 @@ public class EntityTypeRecord {
     }
 
     public Integer getId() {
-        return tb.getId();
+        return tb.getId().getId();
     }
 }

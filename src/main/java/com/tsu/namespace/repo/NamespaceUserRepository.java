@@ -1,9 +1,9 @@
 package com.tsu.namespace.repo;
 
-import com.tsu.base.api.NamespaceUserType;
+import com.tsu.namespace.api.NamespaceUserType;
 import com.tsu.namespace.entities.NamespaceUserTb;
 import com.tsu.namespace.entities.id.NamespaceUserId;
-import com.tsu.base.val.NspUsrVal;
+import com.tsu.namespace.val.NspUsrVal;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

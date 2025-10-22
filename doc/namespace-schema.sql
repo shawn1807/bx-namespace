@@ -41,7 +41,6 @@ CREATE TABLE namespace (
       uri text not null,
       owner_id UUID not null,
       contact_email text not null,
-      primary_workspace_id uuid ,
       bucket text not null,
       props jsonb,
       active boolean default true,
@@ -113,10 +112,9 @@ CREATE  UNIQUE INDEX subscription_plan_u1 ON subscription_plan (namespace_id, na
 
 DROP TABLE IF EXISTS subscription cascade;
 CREATE TABLE subscription (
+      id SERIAL NOT NULL,
       namespace_id UUID NOT NULL,
-      id SERIAL,
       plan_id integer not null,
-      plan_namespace_id uuid not null,
       recurring boolean NOT NULL default true,
       activation_date date,
       expiration_date date,
@@ -136,8 +134,8 @@ CREATE  UNIQUE INDEX subscription_u1 ON subscription (namespace_id);
 
 DROP TABLE IF EXISTS subscription_history cascade;
 CREATE TABLE subscription_history (
+      id serial not null,
       namespace_id uuid NOT NULL,
-      id text,
       provider_id uuid NOT NULL,
       plan text not null,
       activation_date date,
@@ -146,3 +144,161 @@ CREATE TABLE subscription_history (
       created_date timestamp with time zone not null,
       PRIMARY KEY (namespace_id, id)
 );
+
+CREATE EXTENSION IF NOT EXISTS btree_gin;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+DROP TABLE IF EXISTS app_module cascade;
+CREATE TABLE app_module (
+      id serial  PRIMARY KEY,
+      name text not null,
+      version text not null,
+      priority integer default 0,
+      build integer default 0,
+      build_package text not null,
+      modified_date  timestamp with time zone not null
+);
+
+DROP TABLE IF EXISTS upgrade_history cascade;
+CREATE TABLE upgrade_history (
+      id serial  PRIMARY KEY,
+      module text not null,
+      version text not null,
+      build integer  not null,
+      description  text not null,
+      upgrade_date  timestamp with time zone not null
+);
+
+DROP TABLE IF EXISTS place cascade;
+CREATE TABLE place (
+      id serial  PRIMARY KEY,
+      country text not null,
+      county text not null,
+      city text not null,
+      building text,
+      address text not null,
+      lat double precision,
+      lng double precision,
+      post_code text,
+      props jsonb,
+      notes text
+);
+
+DROP TABLE IF EXISTS namespace_role cascade;
+CREATE TABLE namespace_role (
+   namespace_id uuid NOT NULL,
+   id serial,
+   name text not null,
+   description text,
+   permissions jsonb not null,
+   created_by integer not null,
+   created_date timestamp with time zone not null,
+   modified_by integer not null,
+   modified_date timestamp with time zone not null,
+   PRIMARY KEY (namespace_id, id),
+   CONSTRAINT namespace_fk FOREIGN KEY(namespace_id)
+                        	  REFERENCES namespace(id)
+);
+CREATE UNIQUE INDEX namespace_role_u1 ON namespace_role (namespace_id, name);
+
+DROP TABLE IF EXISTS namespace_user cascade;
+CREATE TABLE namespace_user (
+      namespace_id uuid not null,
+      id SERIAL,
+      principal_id uuid NOT NULL,
+      role_id integer,
+      display_name text NOT NULL,
+      type char(1) NOT NULL,
+      permissions jsonb not null,
+      entry_id UUID,
+      active boolean NOT NULL default false,
+      activation_date date,
+      expiration_date date,
+      approved_by uuid,
+      approved_date timestamp with time zone,
+      created_by uuid not null,
+      created_date timestamp with time zone not null,
+      modified_by uuid not null,
+      modified_date timestamp with time zone not null,
+      PRIMARY KEY (namespace_id, id),
+      CONSTRAINT namespace_fk FOREIGN KEY(namespace_id)
+                REFERENCES namespace(id),
+      CONSTRAINT role_fk FOREIGN KEY(namespace_id, role_id)
+                REFERENCES namespace_role(namespace_id, id),
+      CONSTRAINT principal_id_fk FOREIGN KEY(principal_id)
+                              REFERENCES base_principal(id),
+      CONSTRAINT approved_by_fk FOREIGN KEY(approved_by)
+                              REFERENCES base_principal(id),
+      CONSTRAINT created_by_fk FOREIGN KEY(created_by)
+                              REFERENCES base_principal(id),
+      CONSTRAINT modified_by_fk FOREIGN KEY(modified_by)
+                              REFERENCES base_principal(id)
+);
+CREATE  UNIQUE INDEX namespace_user_u1 ON namespace_user (namespace_id, principal_id);
+
+
+
+
+DROP TABLE IF EXISTS entity_type cascade;
+CREATE TABLE entity_type (
+      namespace_id uuid not null,
+      id SERIAL,
+      name text NOT NULL,
+      created_by integer not null,
+      created_date timestamp with time zone not null,
+      PRIMARY KEY (namespace_id, id),
+      CONSTRAINT namespace_fk FOREIGN KEY(namespace_id)
+                                       	  REFERENCES namespace(id),
+      CONSTRAINT created_by_fk FOREIGN KEY(namespace_id, created_by)
+                     	  REFERENCES namespace_user(namespace_id, id)
+);
+CREATE  UNIQUE INDEX entity_type_u1 ON entity_type (namespace_id, name);
+
+DROP TABLE IF EXISTS entity cascade;
+CREATE TABLE entity (
+      namespace_id uuid NOT NULL,
+      id uuid,
+      name text NOT NULL,
+      primary_place_id integer,
+      type_id integer NOT NULL,
+      clazz text,
+      parent_id uuid,
+      email text not null,
+      phone text,
+      profile jsonb,
+      active boolean default true,
+      created_by integer not null,
+      created_date timestamp with time zone not null,
+      modified_by integer not null,
+      modified_date timestamp with time zone not null,
+      PRIMARY KEY (namespace_id, id),
+      CONSTRAINT namespace_fk FOREIGN KEY(namespace_id)
+                                 	  REFERENCES namespace(id),
+      CONSTRAINT type_fk FOREIGN KEY(namespace_id, type_id)
+                                 	  REFERENCES entity_type(namespace_id, id),
+      CONSTRAINT parent_fk FOREIGN KEY(namespace_id, parent_id)
+                                 	  REFERENCES entity(namespace_id, id),
+      CONSTRAINT created_by_fk FOREIGN KEY(namespace_id, created_by)
+                     	  REFERENCES namespace_user(namespace_id, id),
+      CONSTRAINT modified_by_fk FOREIGN KEY(namespace_id, modified_by)
+                          REFERENCES namespace_user(namespace_id, id)
+);
+CREATE  UNIQUE INDEX entity_u1 ON entity (namespace_id,type_id, name);
+
+
+DROP TABLE IF EXISTS event_audit cascade;
+CREATE TABLE event_audit (
+      id BIGSERIAL NOT NULL,
+      namespace_id uuid not null,
+      entry_id UUID,
+      action text not null,
+      params jsonb,
+      txid text not null,
+      created_by integer not null,
+      created_date timestamp with time zone not null,
+      PRIMARY KEY (namespace_id, id),
+      CONSTRAINT created_by_fk FOREIGN KEY(namespace_id, created_by)
+                          REFERENCES namespace_user(namespace_id, id)
+);
+CREATE INDEX event_audit_idx1 ON event_audit(namespace_id, entry_id);
+CREATE INDEX event_audit_idx2 ON event_audit(namespace_id, created_by);

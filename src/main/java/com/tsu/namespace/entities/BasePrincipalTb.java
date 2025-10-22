@@ -1,6 +1,6 @@
 package com.tsu.namespace.entities;
 
-import com.tsu.base.api.PrincipalType;
+import com.tsu.common.api.PrincipalType;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

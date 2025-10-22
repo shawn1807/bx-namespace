@@ -1,20 +1,20 @@
 package com.tsu.namespace.service.impl;
 
-import com.tsu.namespace.api.AuthLogin;
-import com.tsu.base.api.UserBase;
-import com.tsu.namespace.api.UserProfile;
-import com.tsu.namespace.api.namespace.DomainObjectBuilder;
-import com.tsu.base.enums.BaseParamName;
-import com.tsu.namespace.helper.UserDbHelper;
-import com.tsu.namespace.record.UserRecord;
-import com.tsu.namespace.service.UserService;
-import com.tsu.base.val.UserVal;
-import com.tsu.common.api.BasePrincipal;
+import com.tsu.auth.api.BasePrincipal;
 import com.tsu.common.utils.ParamValidator;
 import com.tsu.common.vo.Email;
 import com.tsu.common.vo.Text;
-import com.tsu.security.AppSecurityContext;
-import com.tsu.security.AppSecurityContextInitializer;
+import com.tsu.auth.security.AppSecurityContext;
+import com.tsu.auth.security.AppSecurityContextInitializer;
+import com.tsu.auth.api.AuthLogin;
+import com.tsu.enums.BaseParamName;
+import com.tsu.namespace.api.UserBase;
+import com.tsu.namespace.api.UserProfile;
+import com.tsu.namespace.api.namespace.NamespaceObjectFactory;
+import com.tsu.namespace.helper.UserDbHelper;
+import com.tsu.namespace.record.UserRecord;
+import com.tsu.namespace.service.UserService;
+import com.tsu.common.val.UserVal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
     private UserDbHelper userDbHelper;
 
     @Autowired
-    private DomainObjectBuilder builder;
+    private NamespaceObjectFactory factory;
     @Autowired
     private AppSecurityContextInitializer initializer;
 
@@ -47,10 +47,15 @@ public class UserServiceImpl implements UserService {
                 .withNonNullOrEmpty(name, BaseParamName.NAME)//
                 .withVerifyEmail(email)//
                 .throwIfErrors();
-
+        String firstName = null;
+        String lastName = null;
+        if (profile != null) {
+            firstName = profile.getFirstName();
+            lastName = profile.getLastName();
+        }
         log.trace("Creating user record in database");
         UserRecord userRecord = userDbHelper.register(name.strip(), email.toString(), null, imageUrl,
-                profile.getFirstName(), profile.getLastName(), profile, null);
+                firstName, lastName, profile, null);
         log.debug("User record created with ID: {}", userRecord.id());
 
         if (login != null) {
@@ -82,7 +87,7 @@ public class UserServiceImpl implements UserService {
         UserRecord userRecord = userDbHelper.addUser(name.strip(), email.toString(), imageUrl, profile,
                 context.getPrincipal().id());
 
-        UserBase user = builder.build(userRecord, context);
+        UserBase user = factory.build(userRecord, context);
         log.info("Successfully added user with email: {}", email);
 
         return user;
@@ -101,7 +106,7 @@ public class UserServiceImpl implements UserService {
         Optional<UserBase> foundUser = userDbHelper.findUserById(user.id())
                 .map(userRecord -> {
                     log.debug("User found for principal ID: {}", user.id());
-                    return builder.build(userRecord, context);
+                    return factory.build(userRecord, context);
                 });
 
         if (foundUser.isEmpty()) {

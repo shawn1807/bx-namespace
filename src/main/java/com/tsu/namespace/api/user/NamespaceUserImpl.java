@@ -1,23 +1,21 @@
 package com.tsu.namespace.api.user;
 
+import com.tsu.auth.api.Permission;
+import com.tsu.auth.api.PermissionEffect;
+import com.tsu.auth.permissions.NamespaceAction;
+import com.tsu.auth.security.AppSecurityContext;
+import com.tsu.common.api.ActionPack;
+import com.tsu.common.utils.LazyCacheLoader;
+import com.tsu.common.val.PermissionVal;
+import com.tsu.enums.BaseConstants;
 import com.tsu.namespace.api.*;
-import com.tsu.namespace.api.namespace.DomainObjectBuilder;
-import com.tsu.base.enums.BaseConstants;
-import com.tsu.base.enums.BaseCustomType;
-import com.tsu.base.enums.NamespaceAction;
+import com.tsu.namespace.api.namespace.NamespaceObjectFactory;
 import com.tsu.namespace.helper.UserDbHelper;
 import com.tsu.namespace.record.NamespaceRecord;
 import com.tsu.namespace.record.NamespaceUserRecord;
 import com.tsu.namespace.security.NamespaceContextImpl;
-import com.tsu.namespace.util.Permissions;
-import com.tsu.base.val.NamespaceUserVal;
-import com.tsu.base.val.PermissionVal;
-import com.tsu.common.api.ActionPack;
-import com.tsu.common.api.Permission;
-import com.tsu.common.api.PermissionEffect;
-import com.tsu.common.utils.LazyCacheLoader;
-import com.tsu.entry.api.Container;
-import com.tsu.security.AppSecurityContext;
+import com.tsu.namespace.val.NamespaceUserVal;
+import com.tsu.util.Permissions;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
@@ -32,35 +30,35 @@ public class NamespaceUserImpl implements NamespaceUser {
     private final NamespaceUserRecord record;
     private final AppSecurityContext context;
     private final UserDbHelper userDbHelper;
-    private final DomainObjectBuilder builder;
+    private final NamespaceObjectFactory factory;
     private final LazyCacheLoader<Permissions> helper;
     private final Namespace namespace;
     private final LazyCacheLoader<NamespaceRole> role;
 
 
     public NamespaceUserImpl(NamespaceRecord namespace, NamespaceUserRecord record, AppSecurityContext context,
-                             UserDbHelper userDbHelper, DomainObjectBuilder builder) {
+                             UserDbHelper userDbHelper, NamespaceObjectFactory factory) {
         this.record = record;
         this.context = context;
         this.userDbHelper = userDbHelper;
-        this.builder = builder;
+        this.factory = factory;
         this.helper = LazyCacheLoader.of(() -> new Permissions(record.getPermissions(BaseConstants.PERMISSION_LIST_TYPE)));
-        this.namespace = builder.build(namespace, this, context);
+        this.namespace = factory.build(namespace, this, context);
         this.role = LazyCacheLoader.of(() -> record.getRole()
-                .map(r -> builder.build(r, new NamespaceContextImpl(context, this)))
+                .map(r -> factory.build(r, new NamespaceContextImpl(context, this)))
                 .orElse(null)
         );
     }
 
-    public NamespaceUserImpl(Namespace namespace, NamespaceUserRecord record, AppSecurityContext context, UserDbHelper userDbHelper, DomainObjectBuilder builder) {
+    public NamespaceUserImpl(Namespace namespace, NamespaceUserRecord record, AppSecurityContext context, UserDbHelper userDbHelper, NamespaceObjectFactory factory) {
         this.record = record;
         this.context = context;
         this.userDbHelper = userDbHelper;
-        this.builder = builder;
+        this.factory = factory;
         this.helper = LazyCacheLoader.of(() -> new Permissions(record.getPermissions(BaseConstants.PERMISSION_LIST_TYPE)));
         this.namespace = namespace;
         this.role = LazyCacheLoader.of(() -> record.getRole()
-                .map(r -> builder.build(r, new NamespaceContextImpl(context, this)))
+                .map(r -> factory.build(r, new NamespaceContextImpl(context, this)))
                 .orElse(null)
         );
     }
@@ -82,7 +80,7 @@ public class NamespaceUserImpl implements NamespaceUser {
 
         }
         return userDbHelper.findUserById(record.getUser().id())
-                .map(user -> builder.build(user, context))
+                .map(user -> factory.build(user, context))
                 .orElseThrow(() -> new IllegalStateException("User not found: " + record.getUser().id()));
     }
 
@@ -129,9 +127,7 @@ public class NamespaceUserImpl implements NamespaceUser {
     @Override
     public void approve() {
         getNamespace().getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.MANAGE_USER_SUBSCRIPTION));
-        Container container = getNamespace().getBucket().addContainer(BaseCustomType.MEMBER);
         record.setActive(true);
-        record.setEntry(container);
         record.setApprovedDate(LocalDateTime.now());
         record.setApprovedBy(context.getPrincipal());
         record.persist();
@@ -176,10 +172,6 @@ public class NamespaceUserImpl implements NamespaceUser {
         helper.get().setPermissions(permissions, effect);
     }
 
-    @Override
-    public boolean test(SecurityClass securityClass) {
-        return record.getSecurityClass().allowed(securityClass);
-    }
 
 
 }

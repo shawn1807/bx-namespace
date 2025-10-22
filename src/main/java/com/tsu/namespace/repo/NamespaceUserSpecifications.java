@@ -1,9 +1,8 @@
 package com.tsu.namespace.repo;
 
-import com.tsu.base.api.NamespaceUserType;
-import com.tsu.namespace.api.SecurityClass;
+import com.tsu.namespace.api.NamespaceUserType;
 import com.tsu.namespace.entities.NamespaceUserViewTb;
-import com.tsu.base.request.UserFilter;
+import com.tsu.workspace.request.UserFilter;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -109,17 +108,6 @@ public class NamespaceUserSpecifications {
         };
     }
 
-    /**
-     * Filter by security level
-     */
-    public static Specification<NamespaceUserViewTb> hasSecurityLevel(SecurityClass securityLevel) {
-        return (root, query, cb) -> {
-            if (securityLevel == null) {
-                return cb.conjunction();
-            }
-            return cb.equal(root.get("securityLevel"), securityLevel);
-        };
-    }
 
     /**
      * Filter by active status
@@ -136,12 +124,12 @@ public class NamespaceUserSpecifications {
     /**
      * Filter by role ID
      */
-    public static Specification<NamespaceUserViewTb> hasRoleId(Integer roleId) {
+    public static Specification<NamespaceUserViewTb> hasRole(String role) {
         return (root, query, cb) -> {
-            if (roleId == null) {
+            if (role == null) {
                 return cb.conjunction();
             }
-            return cb.equal(root.get("roleId"), roleId);
+            return cb.equal(root.get("role"), role);
         };
     }
 
@@ -221,7 +209,6 @@ public class NamespaceUserSpecifications {
             if (filter == null) {
                 return cb.conjunction();
             }
-
             List<Predicate> predicates = new ArrayList<>();
 
             // Apply all filter criteria
@@ -246,14 +233,12 @@ public class NamespaceUserSpecifications {
             if (filter.getType() != null) {
                 predicates.add(hasType(filter.getType()).toPredicate(root, query, cb));
             }
-            if (filter.getSecurityLevel() != null) {
-                predicates.add(hasSecurityLevel(filter.getSecurityLevel()).toPredicate(root, query, cb));
-            }
+
             if (filter.getActive() != null) {
                 predicates.add(isActive(filter.getActive()).toPredicate(root, query, cb));
             }
-            if (filter.getRoleId() != null) {
-                predicates.add(hasRoleId(filter.getRoleId()).toPredicate(root, query, cb));
+            if (filter.getRole() != null) {
+                predicates.add(hasRole(filter.getRole()).toPredicate(root, query, cb));
             }
             if (filter.getActivationDateFrom() != null) {
                 predicates.add(activationDateFrom(filter.getActivationDateFrom()).toPredicate(root, query, cb));
