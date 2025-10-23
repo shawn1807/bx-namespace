@@ -11,6 +11,7 @@ import lombok.ToString;
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @ToString
@@ -45,6 +46,15 @@ public class ResourceTb {
     @Column(name = "active", nullable = false)
     private boolean active = true;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "created_by", nullable = false)
+    private UUID createdBy;
+
+    @Column(name = "created_date", nullable = false)
+    private LocalDateTime createdDate;
+
+    @Column(name = "modified_by", nullable = false)
+    private UUID modifiedBy;
+
+    @Column(name = "modified_date", nullable = false)
+    private LocalDateTime modifiedDate;
 }

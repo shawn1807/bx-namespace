@@ -171,18 +171,39 @@ CREATE TABLE upgrade_history (
 
 DROP TABLE IF EXISTS place cascade;
 CREATE TABLE place (
-      id serial  PRIMARY KEY,
+      id uuid  NOT NULL,
+      namespace_id UUID not null,
+      type             text NOT NULL,                   -- country|region|city|neighborhood|poi|campus|building|floor|room|route|area|water|...
+      iso_country      char(2),                         -- ISO-3166-1 alpha-2 (for countries or inferred)
       country text not null,
       county text not null,
       city text not null,
       building text,
       address text not null,
+      post_code text,
+        -- geo
       lat double precision,
       lng double precision,
-      post_code text,
+      center           geography(Point, 4326),          -- WGS84, for fast distance/radius sorts
       props jsonb,
-      notes text
+      notes text,
+      created_at       timestamptz NOT NULL DEFAULT now(),
+      updated_at       timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (namespace_id, id),
+      CONSTRAINT namespace_fk FOREIGN KEY(namespace_id)
+                              	  REFERENCES namespace(id)
 );
+-- Props search (if you filter on jsonb keys)
+CREATE INDEX location_props_gin_idx    ON location USING gin (props);
+
+-- Geo: center for distance & radius, bbox for coarse filters
+CREATE INDEX location_center_gist_idx  ON location USING gist (center);
+CREATE INDEX location_bbox_gist_idx    ON location USING gist (bbox);
+CREATE INDEX location_type_idx         ON location (type);
+CREATE INDEX location_iso_idx          ON location (iso_country);
+CREATE INDEX location_post_code_idx          ON location (post_code);
+CREATE INDEX location_namespace_idx    ON location (namespace_id);
+
 
 DROP TABLE IF EXISTS namespace_role cascade;
 CREATE TABLE namespace_role (
@@ -259,7 +280,7 @@ CREATE TABLE entity (
       namespace_id uuid NOT NULL,
       id uuid,
       name text NOT NULL,
-      primary_place_id integer,
+      primary_place_id UUID,
       type_id integer NOT NULL,
       clazz text,
       parent_id uuid,

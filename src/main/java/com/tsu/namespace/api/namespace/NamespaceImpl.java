@@ -49,6 +49,8 @@ public class NamespaceImpl implements Namespace {
     private final LazyCacheLoader<EntryBucket> bucket;
     private final LazyCacheLoader<CalendarManager> calendarManager;
     private final LazyCacheLoader<PlaceManager> placeManager;
+    private final LazyCacheLoader<ResourceManager> resourceManager;
+    private final LazyCacheLoader<BookingManager> bookingManager;
     private final PermissionManager permissionManager;
     private final NamespaceDbHelper namespaceDbHelper;
     private final LazyCacheLoader<MetadataManager> metadataManager;
@@ -65,6 +67,8 @@ public class NamespaceImpl implements Namespace {
                          EntityDbHelper entityDbHelper,
                          NumberDbHelper numberDbHelper, BucketService bucketService,
                          PlaceDbHelper placeDbHelper,
+                         ResourceDbHelper resourceDbHelper,
+                         BookingDbHelper bookingDbHelper,
                          SubscriptionDbHelper subscriptionDbHelper, AppDbHelper appDbHelper, IDGeneratorService idGeneratorService,
                          NamespaceObjectFactory factory) {
         this.value = value;
@@ -82,6 +86,8 @@ public class NamespaceImpl implements Namespace {
                 entityDbHelper, factory));
         this.permissionManager = new NamespacePermissionManager(namespaceContext, appDbHelper);
         this.placeManager = LazyCacheLoader.of(() -> new NamespacePlaceManager(this, context, placeDbHelper, factory));
+        this.resourceManager = LazyCacheLoader.of(() -> new ResourceManagerImpl(this, context, resourceDbHelper));
+        this.bookingManager = LazyCacheLoader.of(() -> new BookingManagerImpl(this, context, bookingDbHelper));
         this.calendarManager = LazyCacheLoader.of(() -> new NamespaceCalendarManager(this, context));
         this.textManager = LazyCacheLoader.of(() -> new EntryTextManager(bucket.get().getRoot(), permissionManager));
         this.namespaceUsers = LazyCacheLoader.of(() -> new CachedNamespaceUsers(namespaceDbHelper.findNamespaceJoinedUserInfoByNamespaceId(value.getId()).toList()));
@@ -126,6 +132,16 @@ public class NamespaceImpl implements Namespace {
     @Override
     public PlaceManager getPlaceManager() {
         return placeManager.get();
+    }
+
+    @Override
+    public ResourceManager getResourceManager() {
+        return resourceManager.get();
+    }
+
+    @Override
+    public BookingManager getBookingManager() {
+        return bookingManager.get();
     }
 
     @Override

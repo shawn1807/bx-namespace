@@ -59,6 +59,26 @@ public class UserBaseTb {
     @Column(name = "expiration_date")
     private LocalDate expirationDate;
 
+    // Locale and regional settings (nullable - falls back to namespace settings)
+    @Column(name = "currency_code", length = 3)
+    private String currencyCode;  // ISO 4217 override
+
+    @Column(name = "language_tag")
+    private String languageTag;  // IETF BCP47 override
+
+    @Column(name = "timezone_id")
+    private String timezoneId;  // IANA timezone override
+
+    @Column(name = "date_pattern")
+    private String datePattern;  // Date format override
+
+    @Column(name = "time_pattern")
+    private String timePattern;  // Time format override
+
+    @Column(name = "datetime_pattern")
+    private String datetimePattern;  // DateTime format override
+
+    // Audit fields
     @Column(name = "created_by", nullable = false)
     private UUID createdBy;
 

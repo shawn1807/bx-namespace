@@ -3,6 +3,7 @@ package com.tsu.namespace.repo;
 import com.tsu.namespace.api.ResourceType;
 import com.tsu.namespace.entities.ResourceTb;
 import com.tsu.namespace.entities.id.ResourceId;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -17,7 +18,7 @@ public interface ResourceRepository extends JpaRepository<ResourceTb, ResourceId
     /**
      * Find all resources in a namespace
      */
-    Stream<ResourceTb> findByIdNamespaceId(UUID namespaceId);
+    Stream<ResourceTb> findByIdNamespaceId(UUID namespaceId, Pageable page);
 
     /**
      * Find a specific resource by namespace and ID
@@ -27,7 +28,7 @@ public interface ResourceRepository extends JpaRepository<ResourceTb, ResourceId
     /**
      * Find resources by type
      */
-    Stream<ResourceTb> findByIdNamespaceIdAndType(UUID namespaceId, ResourceType type);
+    Stream<ResourceTb> findByIdNamespaceIdAndType(UUID namespaceId, ResourceType type,Pageable pageable);
 
     /**
      * Find resources by name
@@ -37,12 +38,12 @@ public interface ResourceRepository extends JpaRepository<ResourceTb, ResourceId
     /**
      * Find active resources in a namespace
      */
-    Stream<ResourceTb> findByIdNamespaceIdAndActiveTrue(UUID namespaceId);
+    Stream<ResourceTb> findByIdNamespaceIdAndActiveTrue(UUID namespaceId,Pageable pageable);
 
     /**
      * Find active resources by type
      */
-    Stream<ResourceTb> findByIdNamespaceIdAndTypeAndActiveTrue(UUID namespaceId, ResourceType type);
+    Stream<ResourceTb> findByIdNamespaceIdAndTypeAndActiveTrue(UUID namespaceId, ResourceType type,Pageable pageable);
 
     /**
      * Find resources by location
@@ -52,5 +53,5 @@ public interface ResourceRepository extends JpaRepository<ResourceTb, ResourceId
             FROM resource r
             WHERE r.namespace_id = ?1 AND r.location = ?2
             """, nativeQuery = true)
-    Stream<ResourceTb> findByNamespaceIdAndLocation(UUID namespaceId, String location);
+    Stream<ResourceTb> findByNamespaceIdAndLocation(UUID namespaceId, String location,Pageable pageable);
 }

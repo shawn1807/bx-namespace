@@ -12,7 +12,6 @@ SELECT
     r.name as role,
     nu.display_name,
     nu.type,
-    nu.security_level,
     nu.permissions,
     nu.entry_id,
     nu.active,

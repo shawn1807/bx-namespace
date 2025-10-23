@@ -52,21 +52,18 @@ public class BookingTb {
     @Column(name = "status", nullable = false)
     private BookingStatus status = BookingStatus.CONFIRMED;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "deleted_date", nullable = false)
+    private LocalDateTime deletedDate;
 
-    @Column(name = "created_by")
+    @Column(name = "created_by", nullable = false)
     private UUID createdBy;
 
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    @Column(name = "created_date", nullable = false)
+    private LocalDateTime createdDate;
 
-    @Column(name = "updated_by")
-    private UUID updatedBy;
+    @Column(name = "modified_by", nullable = false)
+    private UUID modifiedBy;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
-    // Note: slot field is a generated column (tstzrange) in PostgreSQL
-    // Not mapped in JPA as it's automatically maintained by the database
+    @Column(name = "modified_date", nullable = false)
+    private LocalDateTime modifiedDate;
 }

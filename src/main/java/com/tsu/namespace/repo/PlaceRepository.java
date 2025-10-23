@@ -1,6 +1,7 @@
 package com.tsu.namespace.repo;
 
 import com.tsu.namespace.entities.PlaceTb;
+import com.tsu.namespace.entities.id.PlaceId;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface PlaceRepository extends JpaRepository<PlaceTb, Integer> {
+public interface PlaceRepository extends JpaRepository<PlaceTb, PlaceId> {
 
     // Find places within a given radius (in meters) from a point using PostGIS geography type for accurate distance
     @Query(value = "SELECT * FROM place p WHERE ST_DWithin(p.geom::geography, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography, :radiusMeters)", nativeQuery = true)

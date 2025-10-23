@@ -43,6 +43,12 @@ public class NamespaceObjectFactory {
     private PlaceDbHelper placeDbHelper;
 
     @Autowired
+    private ResourceDbHelper resourceDbHelper;
+
+    @Autowired
+    private BookingDbHelper bookingDbHelper;
+
+    @Autowired
     private AppDbHelper appDbHelper;
 
 
@@ -52,7 +58,8 @@ public class NamespaceObjectFactory {
     public Namespace build(NamespaceRecord record, NamespaceUser user, AppSecurityContext context) {
         return new NamespaceImpl(context, user, record, namespaceDbHelper,
                 entityDbHelper, numberDbHelper, bucketService,
-                placeDbHelper, subscriptionDbHelper, appDbHelper, idGeneratorService, this);
+                placeDbHelper, resourceDbHelper, bookingDbHelper,
+                subscriptionDbHelper, appDbHelper, idGeneratorService, this);
     }
 
 

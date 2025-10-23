@@ -4,25 +4,32 @@
 -- ===========================================================
 
 CREATE EXTENSION IF NOT EXISTS btree_gist;
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- ===========================================================
 -- Resource tables
 -- ===========================================================
 
-CREATE TYPE resource_type AS ENUM ('room','equipment','vehicle','person','space');
+CREATE TYPE resource_type AS ENUM ('ROOM','EQUIP','VEHICLE','PERSON','SPACE');
 
 CREATE TABLE resource (
-  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  id              uuid PRIMARY KEY,
   namespace_id    uuid NOT NULL,
   name            text NOT NULL,
   type            resource_type NOT NULL,
-  capacity        int,
-  location        text,
-  timezone        text,
-  meta            jsonb,
-  active          boolean NOT NULL DEFAULT true,
-  created_at      timestamptz NOT NULL DEFAULT now()
+  capacity integer NOT NULL DEFAULT 1,   -- max concurrent bookings for this unit
+  active boolean NOT NULL DEFAULT true,
+  props jsonb,
+  created_by uuid not null,
+  created_date timestamp with time zone not null,
+  modified_by uuid not null,
+  modified_date timestamp with time zone not null,
+  PRIMARY KEY (namespace_id, id),
+  CONSTRAINT namespace_fk FOREIGN KEY(namespace_id)
+                        	  REFERENCES namespace(id),
+  CONSTRAINT created_by_fk FOREIGN KEY(created_by)
+               REFERENCES base_principal(id),
+  CONSTRAINT modified_by_fk FOREIGN KEY(modified_by)
+               REFERENCES base_principal(id)
 );
 
 CREATE INDEX resource_namespace_idx ON resource (namespace_id);
@@ -71,12 +78,16 @@ CREATE TABLE booking (
   start_at       timestamptz NOT NULL,
   end_at         timestamptz NOT NULL CHECK (end_at > start_at),
   status         booking_status NOT NULL DEFAULT 'confirmed',
-  created_at     timestamptz NOT NULL DEFAULT now(),
-  created_by     uuid,
-  updated_at     timestamptz NOT NULL DEFAULT now(),
-  updated_by     uuid,
-  deleted_at     timestamptz,
-  slot           tstzrange GENERATED ALWAYS AS (tstzrange(start_at, end_at, '[)')) STORED
+  deleted_date     timestamptz,
+  slot           tstzrange GENERATED ALWAYS AS (tstzrange(start_at, end_at, '[)')) STORED,
+    created_by uuid not null,
+    created_date timestamp with time zone not null,
+    modified_by uuid not null,
+    modified_date timestamp with time zone not null,
+      CONSTRAINT created_by_fk FOREIGN KEY(created_by)
+                        REFERENCES base_principal(id),
+      CONSTRAINT modified_by_fk FOREIGN KEY(modified_by)
+                          REFERENCES base_principal(id)
 );
 
 CREATE INDEX booking_namespace_idx      ON booking (namespace_id);
@@ -106,8 +117,15 @@ CREATE TABLE booking_hold (
   start_at       timestamptz NOT NULL,
   end_at         timestamptz NOT NULL CHECK (end_at > start_at),
   expires_at     timestamptz NOT NULL,
-  created_at     timestamptz NOT NULL DEFAULT now(),
-  slot           tstzrange GENERATED ALWAYS AS (tstzrange(start_at, end_at, '[)')) STORED
+  slot           tstzrange GENERATED ALWAYS AS (tstzrange(start_at, end_at, '[)')) STORED,
+    created_by uuid not null,
+    created_date timestamp with time zone not null,
+    modified_by uuid not null,
+    modified_date timestamp with time zone not null,
+      CONSTRAINT created_by_fk FOREIGN KEY(created_by)
+                        REFERENCES base_principal(id),
+      CONSTRAINT modified_by_fk FOREIGN KEY(modified_by)
+                          REFERENCES base_principal(id)
 );
 
 CREATE INDEX hold_expiry_idx        ON booking_hold (expires_at);
@@ -121,7 +139,14 @@ CREATE TABLE booking_waitlist (
   desired_start  timestamptz NOT NULL,
   desired_end    timestamptz NOT NULL CHECK (desired_end > desired_start),
   priority       int NOT NULL DEFAULT 100,
-  created_at     timestamptz NOT NULL DEFAULT now()
+    created_by uuid not null,
+    created_date timestamp with time zone not null,
+    modified_by uuid not null,
+    modified_date timestamp with time zone not null,
+      CONSTRAINT created_by_fk FOREIGN KEY(created_by)
+                        REFERENCES base_principal(id),
+      CONSTRAINT modified_by_fk FOREIGN KEY(modified_by)
+                          REFERENCES base_principal(id)
 );
 
 CREATE INDEX waitlist_res_time_idx ON booking_waitlist (namespace_id, resource_id, priority, created_at);
@@ -129,19 +154,39 @@ CREATE INDEX waitlist_res_time_idx ON booking_waitlist (namespace_id, resource_i
 -- ===========================================================
 -- Audit log
 -- ===========================================================
+CREATE TABLE IF NOT EXISTS audit_log (
+    id                  bigserial PRIMARY KEY,          -- unique event id
+    namespace_id        uuid        NOT NULL,           -- tenant / workspace scope
+    occurred_at         timestamptz NOT NULL DEFAULT now(),  -- when action occurred (UTC)
 
-CREATE TABLE audit_log (
-  id            bigserial PRIMARY KEY,
-  namespace_id  uuid NOT NULL,
-  actor_id      uuid,
-  entity        text NOT NULL,
-  entity_id     uuid NOT NULL,
-  action        text NOT NULL,
-  at            timestamptz NOT NULL DEFAULT now(),
-  diff          jsonb
+    -- actor info
+    actor_id            text        NOT NULL,           -- Keycloak subject or user id
+    actor_name          text        NULL,               -- display name
+    actor_roles         text        NULL,               -- comma-separated roles
+    ip_address          inet        NULL,               -- source IP
+    user_agent          text        NULL,               -- client user agent
+
+    -- tracing / correlation
+    trace_id            text        NULL,               -- OpenTelemetry trace id
+    span_id             text        NULL,               -- OpenTelemetry span id
+    request_id          text        NULL,               -- HTTP request id
+
+    -- action & target
+    action              text        NOT NULL,           -- e.g. TASK.CREATED, LOGIN.SUCCESS
+    severity            varchar(1)  NOT NULL DEFAULT 'I',  -- I=info, W=warn, E=error, S=security
+    subject_type        text        NOT NULL,           -- "task", "workspace", "user", etc.
+    subject_id          text        NOT NULL,           -- id of affected entity (text for UUID/long)
+    target_namespace_id uuid        NULL,               -- optional cross-namespace target
+
+    -- details
+    description         text        NULL,               -- readable summary
+    meta            jsonb       NOT NULL DEFAULT '{}'::jsonb,  -- structured metadata payload
+    ingest_source       text        NULL,               -- "api","job","webhook"
+
+    -- housekeeping
+    created_date          timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX audit_ns_entity_time_idx ON audit_log (namespace_id, entity, at DESC);
 
 -- ===========================================================
 -- Optional optimization indexes
