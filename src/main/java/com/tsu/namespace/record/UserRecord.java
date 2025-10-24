@@ -93,15 +93,61 @@ public class UserRecord {
         return tb.isActive();
     }
 
-    public LocalDate getExpirationDate() {
-        return tb.getExpirationDate();
-    }
-
     public void setActive(boolean active) {
         tb.setActive(active);
     }
 
     public void setImageUrl(String url) {
         tb.setImageUrl(url);
+    }
+
+    // ========== Locale Settings ==========
+
+    public String getCurrencyCode() {
+        return tb.getCurrencyCode();
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        tb.setCurrencyCode(currencyCode);
+    }
+
+    public String getLanguageTag() {
+        return tb.getLanguageTag();
+    }
+
+    public void setLanguageTag(String languageTag) {
+        tb.setLanguageTag(languageTag);
+    }
+
+    public String getTimezoneId() {
+        return tb.getTimezoneId();
+    }
+
+    public void setTimezoneId(String timezoneId) {
+        tb.setTimezoneId(timezoneId);
+    }
+
+    public String getDatePattern() {
+        return tb.getDatePattern();
+    }
+
+    public void setDatePattern(String datePattern) {
+        tb.setDatePattern(datePattern);
+    }
+
+    public String getTimePattern() {
+        return tb.getTimePattern();
+    }
+
+    public void setTimePattern(String timePattern) {
+        tb.setTimePattern(timePattern);
+    }
+
+    public String getDatetimePattern() {
+        return tb.getDatetimePattern();
+    }
+
+    public void setDatetimePattern(String datetimePattern) {
+        tb.setDatetimePattern(datetimePattern);
     }
 }

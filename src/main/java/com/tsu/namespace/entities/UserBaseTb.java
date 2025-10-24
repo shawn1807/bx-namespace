@@ -56,9 +56,6 @@ public class UserBaseTb {
     @Column(name = "active", nullable = false)
     private boolean active;
 
-    @Column(name = "expiration_date")
-    private LocalDate expirationDate;
-
     // Locale and regional settings (nullable - falls back to namespace settings)
     @Column(name = "currency_code", length = 3)
     private String currencyCode;  // ISO 4217 override

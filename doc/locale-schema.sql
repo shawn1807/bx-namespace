@@ -33,42 +33,7 @@ INSERT INTO iso_currency (code, numeric_code, name, symbol, decimal_places) VALU
 
 CREATE INDEX iso_currency_active_idx ON iso_currency (active);
 
--- Add locale/regional settings to namespace table
-ALTER TABLE namespace ADD COLUMN IF NOT EXISTS currency_code CHAR(3) REFERENCES iso_currency(code);
-ALTER TABLE namespace ADD COLUMN IF NOT EXISTS language_tag TEXT;         -- IETF BCP47, e.g. 'zh-TW', 'en-US'
-ALTER TABLE namespace ADD COLUMN IF NOT EXISTS timezone_id TEXT;          -- IANA TZ, e.g. 'Asia/Taipei', 'America/New_York'
-ALTER TABLE namespace ADD COLUMN IF NOT EXISTS date_pattern TEXT;         -- e.g. 'yyyy-MM-dd' (LDML/Java)
-ALTER TABLE namespace ADD COLUMN IF NOT EXISTS time_pattern TEXT;         -- e.g. 'HH:mm'
-ALTER TABLE namespace ADD COLUMN IF NOT EXISTS datetime_pattern TEXT;     -- e.g. 'yyyy-MM-dd HH:mm'
 
--- Add locale/regional settings to user_base table (nullable - falls back to namespace)
-ALTER TABLE user_base ADD COLUMN IF NOT EXISTS currency_code CHAR(3) REFERENCES iso_currency(code);
-ALTER TABLE user_base ADD COLUMN IF NOT EXISTS language_tag TEXT;
-ALTER TABLE user_base ADD COLUMN IF NOT EXISTS timezone_id TEXT;
-ALTER TABLE user_base ADD COLUMN IF NOT EXISTS date_pattern TEXT;
-ALTER TABLE user_base ADD COLUMN IF NOT EXISTS time_pattern TEXT;
-ALTER TABLE user_base ADD COLUMN IF NOT EXISTS datetime_pattern TEXT;
-
--- Indexes for locale settings
-CREATE INDEX namespace_currency_idx ON namespace (currency_code);
-CREATE INDEX namespace_language_idx ON namespace (language_tag);
-CREATE INDEX namespace_timezone_idx ON namespace (timezone_id);
-
-CREATE INDEX user_base_currency_idx ON user_base (currency_code);
-CREATE INDEX user_base_language_idx ON user_base (language_tag);
-CREATE INDEX user_base_timezone_idx ON user_base (timezone_id);
-
--- Default values for common configurations
-COMMENT ON COLUMN namespace.currency_code IS 'ISO 4217 currency code (USD, EUR, TWD, etc.)';
-COMMENT ON COLUMN namespace.language_tag IS 'IETF BCP47 language tag (en-US, zh-TW, ja-JP, etc.)';
-COMMENT ON COLUMN namespace.timezone_id IS 'IANA timezone identifier (America/New_York, Asia/Taipei, etc.)';
-COMMENT ON COLUMN namespace.date_pattern IS 'Java DateTimeFormatter pattern for dates (yyyy-MM-dd, MM/dd/yyyy, etc.)';
-COMMENT ON COLUMN namespace.time_pattern IS 'Java DateTimeFormatter pattern for times (HH:mm, hh:mm a, etc.)';
-COMMENT ON COLUMN namespace.datetime_pattern IS 'Java DateTimeFormatter pattern for date-times';
-
-COMMENT ON COLUMN user_base.currency_code IS 'User override for currency (falls back to namespace if NULL)';
-COMMENT ON COLUMN user_base.language_tag IS 'User override for language (falls back to namespace if NULL)';
-COMMENT ON COLUMN user_base.timezone_id IS 'User override for timezone (falls back to namespace if NULL)';
 
 -- Function to get effective locale settings (with fallback)
 CREATE OR REPLACE FUNCTION get_effective_locale_settings(

@@ -111,6 +111,10 @@ public class NamespaceRecord {
         persist.accept(tb);
     }
 
+
+
+
+
     public NamespaceVal getValue() {
         return new NamespaceVal(tb.getId(), tb.getName(), tb.getDescription(), tb.getUri(), tb.getContactEmail(), tb.getBackgroundImageUrl(),
                 getOwner(), tb.getAccessLevel(),
@@ -118,5 +122,54 @@ public class NamespaceRecord {
                 tb.getCreatedDate(), getModifiedBy(), getModifiedDate());
     }
 
+    // ========== Locale Settings ==========
+
+    public String getCurrencyCode() {
+        return tb.getCurrencyCode();
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        tb.setCurrencyCode(currencyCode);
+    }
+
+    public String getLanguageTag() {
+        return tb.getLanguageTag();
+    }
+
+    public void setLanguageTag(String languageTag) {
+        tb.setLanguageTag(languageTag);
+    }
+
+    public String getTimezoneId() {
+        return tb.getTimezoneId();
+    }
+
+    public void setTimezoneId(String timezoneId) {
+        tb.setTimezoneId(timezoneId);
+    }
+
+    public String getDatePattern() {
+        return tb.getDatePattern();
+    }
+
+    public void setDatePattern(String datePattern) {
+        tb.setDatePattern(datePattern);
+    }
+
+    public String getTimePattern() {
+        return tb.getTimePattern();
+    }
+
+    public void setTimePattern(String timePattern) {
+        tb.setTimePattern(timePattern);
+    }
+
+    public String getDatetimePattern() {
+        return tb.getDatetimePattern();
+    }
+
+    public void setDatetimePattern(String datetimePattern) {
+        tb.setDatetimePattern(datetimePattern);
+    }
 
 }

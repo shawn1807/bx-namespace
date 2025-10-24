@@ -19,8 +19,13 @@ CREATE TABLE user_base (
       phone text,
       profile jsonb,
       preference jsonb,
+      currency_code CHAR(3) REFERENCES iso_currency(code);
+      language_tag TEXT;
+      timezone_id TEXT;
+      date_pattern TEXT;
+      time_pattern TEXT;
+      datetime_pattern TEXT;
       active boolean default true,
-      expiration_date date,
       created_by uuid not null,
       created_date timestamp with time zone not null,
       modified_by uuid not null,
@@ -33,6 +38,12 @@ CREATE TABLE user_base (
 CREATE  INDEX user_base_idx1 ON user_base (display_name);
 CREATE  INDEX user_base_idx2 ON user_base (email);
 CREATE  INDEX user_base_idx3 ON user_base (phone);
+CREATE INDEX user_base_currency_idx ON user_base (currency_code);
+CREATE INDEX user_base_language_idx ON user_base (language_tag);
+CREATE INDEX user_base_timezone_idx ON user_base (timezone_id);
+COMMENT ON COLUMN user_base.currency_code IS 'User override for currency (falls back to namespace if NULL)';
+COMMENT ON COLUMN user_base.language_tag IS 'User override for language (falls back to namespace if NULL)';
+COMMENT ON COLUMN user_base.timezone_id IS 'User override for timezone (falls back to namespace if NULL)';
 
 DROP TABLE IF EXISTS namespace cascade;
 CREATE TABLE namespace (
@@ -50,6 +61,12 @@ CREATE TABLE namespace (
       website text,
       logo_image_url text,
       background_image_url text,
+      currency_code CHAR(3) REFERENCES iso_currency(code);
+      language_tag TEXT;
+      timezone_id TEXT;
+      date_pattern TEXT;
+      time_pattern TEXT;
+      datetime_pattern TEXT;
       access_level text not null,
       created_by UUID not null,
       created_date timestamp with time zone not null,
@@ -64,6 +81,15 @@ CREATE TABLE namespace (
 );
 CREATE UNIQUE INDEX namespace_u1 ON namespace (name);
 CREATE UNIQUE INDEX namespace_u2 ON namespace (uri);
+CREATE INDEX namespace_currency_idx ON namespace (currency_code);
+CREATE INDEX namespace_language_idx ON namespace (language_tag);
+CREATE INDEX namespace_timezone_idx ON namespace (timezone_id);
+COMMENT ON COLUMN namespace.currency_code IS 'ISO 4217 currency code (USD, EUR, TWD, etc.)';
+COMMENT ON COLUMN namespace.language_tag IS 'IETF BCP47 language tag (en-US, zh-TW, ja-JP, etc.)';
+COMMENT ON COLUMN namespace.timezone_id IS 'IANA timezone identifier (America/New_York, Asia/Taipei, etc.)';
+COMMENT ON COLUMN namespace.date_pattern IS 'Java DateTimeFormatter pattern for dates (yyyy-MM-dd, MM/dd/yyyy, etc.)';
+COMMENT ON COLUMN namespace.time_pattern IS 'Java DateTimeFormatter pattern for times (HH:mm, hh:mm a, etc.)';
+COMMENT ON COLUMN namespace.datetime_pattern IS 'Java DateTimeFormatter pattern for date-times';
 
 DROP TABLE IF EXISTS auth_provider cascade;
 CREATE TABLE auth_provider (

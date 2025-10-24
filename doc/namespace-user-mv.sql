@@ -33,7 +33,6 @@ SELECT
     ub.profile,
     ub.preference,
     ub.active as user_active,
-    ub.expiration_date as user_expiration_date
 FROM namespace_user nu
 -- Join user_base
 INNER JOIN user_base ub

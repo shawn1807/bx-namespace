@@ -12,6 +12,9 @@ import com.tsu.entry.service.BucketService;
 import com.tsu.auth.security.AppSecurityContext;
 import com.tsu.enums.BaseConstants;
 import com.tsu.enums.BaseParamName;
+import com.tsu.common.locale.EffectiveLocaleSettings;
+import com.tsu.common.locale.EffectiveLocaleSettingsBuilder;
+import com.tsu.namespace.api.formatter.FormatterImpl;
 import com.tsu.namespace.helper.NamespaceDbHelper;
 import com.tsu.namespace.record.NamespaceRecord;
 import com.tsu.namespace.record.UserRecord;
@@ -24,7 +27,6 @@ import com.tsu.common.val.UserVal;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -189,7 +191,17 @@ public class UserBaseImpl implements UserBase {
 
     @Override
     public Formatter getFormatter() {
-        return new UserDataFormatter(record);
+        // Build effective locale settings from user preferences (no namespace fallback at user level)
+        EffectiveLocaleSettings localeSettings = new EffectiveLocaleSettingsBuilder()
+            .currencyCode(record.getCurrencyCode())
+            .languageTag(record.getLanguageTag())
+            .timezoneId(record.getTimezoneId())
+            .datePattern(record.getDatePattern())
+            .timePattern(record.getTimePattern())
+            .datetimePattern(record.getDatetimePattern())
+            .build();
+
+        return new FormatterImpl(localeSettings);
     }
 
     @Override
@@ -199,12 +211,7 @@ public class UserBaseImpl implements UserBase {
 
     @Override
     public boolean isValid() {
-        if (record.isActive()) {
-            return Optional.ofNullable(record.getExpirationDate())
-                    .map(expiry -> LocalDate.now().isAfter(expiry))
-                    .orElse(false);
-        }
-        return false;
+        return record.isActive();
     }
 
     @Override

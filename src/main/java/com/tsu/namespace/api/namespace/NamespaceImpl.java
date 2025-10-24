@@ -9,6 +9,8 @@ import com.tsu.auth.security.NamespaceContext;
 import com.tsu.common.api.ActionPack;
 import com.tsu.common.api.EntryMetadataManager;
 import com.tsu.common.api.MetadataManager;
+import com.tsu.common.locale.EffectiveLocaleSettings;
+import com.tsu.common.locale.EffectiveLocaleSettingsBuilder;
 import com.tsu.common.utils.LazyCacheLoader;
 import com.tsu.common.utils.ParamValidator;
 import com.tsu.common.vo.Text;
@@ -18,6 +20,7 @@ import com.tsu.entry.api.Node;
 import com.tsu.entry.service.BucketService;
 import com.tsu.enums.BaseParamName;
 import com.tsu.namespace.api.*;
+import com.tsu.namespace.api.formatter.FormatterImpl;
 import com.tsu.namespace.api.manager.*;
 import com.tsu.namespace.helper.*;
 import com.tsu.namespace.record.NamespaceRecord;
@@ -27,6 +30,7 @@ import com.tsu.namespace.security.NamespaceContextImpl;
 import com.tsu.namespace.service.IDGeneratorService;
 import com.tsu.namespace.val.*;
 import com.tsu.place.api.PlaceManager;
+import com.tsu.workspace.api.Formatter;
 import com.tsu.workspace.api.TextManager;
 import com.tsu.workspace.request.UserFilter;
 import lombok.ToString;
@@ -36,6 +40,9 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Currency;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -280,5 +287,69 @@ public class NamespaceImpl implements Namespace {
                 ));
     }
 
+    // ========== LocaleSettings Implementation ==========
+
+    @Override
+    public Formatter getFormater() {
+        return new FormatterImpl(getSettings());
+    }
+
+    @Override
+    public void setCurrency(Currency currency) {
+        log.info("Updating currency for namespace ID: {} to '{}'", getId(), currency.getCurrencyCode());
+        getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.SET_NAMESPACE_PROPS, "currency", currency));
+        value.setCurrencyCode(currency.getCurrencyCode());
+        value.persist();
+        log.debug("Currency updated successfully for namespace ID: {}", getId());
+    }
+
+    @Override
+    public void setLocale(Locale locale) {
+        log.info("Updating locale for namespace ID: {} to '{}'", getId(), locale.toLanguageTag());
+        getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.SET_NAMESPACE_PROPS, "locale", locale));
+        value.setLanguageTag(locale.toLanguageTag());
+        value.persist();
+        log.debug("Locale updated successfully for namespace ID: {}", getId());
+    }
+
+    @Override
+    public void setZone(ZoneId zone) {
+        log.info("Updating timezone for namespace ID: {} to '{}'", getId(), zone.getId());
+        getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.SET_NAMESPACE_PROPS, "timezone", zone));
+        value.setTimezoneId(zone.getId());
+        value.persist();
+        log.debug("Timezone updated successfully for namespace ID: {}", getId());
+    }
+
+    @Override
+    public void setDateFormat(String dateFormat) {
+        log.info("Updating date format for namespace ID: {} to '{}'", getId(), dateFormat);
+        getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.SET_NAMESPACE_PROPS, "dateFormat", dateFormat));
+        value.setDatePattern(dateFormat);
+        value.persist();
+        log.debug("Date format updated successfully for namespace ID: {}", getId());
+    }
+
+    @Override
+    public void setTimeFormat(String timeFormat) {
+        log.info("Updating time format for namespace ID: {} to '{}'", getId(), timeFormat);
+        getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.SET_NAMESPACE_PROPS, "timeFormat", timeFormat));
+        value.setTimePattern(timeFormat);
+        value.persist();
+        log.debug("Time format updated successfully for namespace ID: {}", getId());
+    }
+
+    @Override
+    public EffectiveLocaleSettings getSettings() {
+        // Build effective locale settings from namespace settings only (no user fallback at namespace level)
+        return new EffectiveLocaleSettingsBuilder()
+            .currencyCode(value.getCurrencyCode())
+            .languageTag(value.getLanguageTag())
+            .timezoneId(value.getTimezoneId())
+            .datePattern(value.getDatePattern())
+            .timePattern(value.getTimePattern())
+            .datetimePattern(value.getDatetimePattern())
+            .build();
+    }
 
 }
