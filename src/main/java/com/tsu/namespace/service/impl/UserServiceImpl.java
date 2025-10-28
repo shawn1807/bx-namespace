@@ -1,6 +1,5 @@
 package com.tsu.namespace.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tsu.auth.api.BasePrincipal;
 import com.tsu.auth.security.AppJwtAuthenticationToken;
 import com.tsu.auth.security.AppSecurityContext;
@@ -46,7 +45,6 @@ public class UserServiceImpl implements UserService {
     private NamespaceObjectFactory factory;
     @Autowired
     private AppSecurityContextInitializer initializer;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public UserVal register(RegisterUser register) {
         log.info("Registering a new user: {} ", register);

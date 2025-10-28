@@ -146,6 +146,9 @@ public class UserBaseImpl implements UserBase {
 
     @Override
     public UserProfile toProfile() {
+        if(!Objects.equals(context.getPrincipal().id().toString(),id().toString())){
+            throw new PermissionDeniedException("read other user's profile is not allowed");
+        }
         UserVal val = record.getValue();
         return new UserProfile(val.id(), val.displayName(), val.firstName(), val.lastName(), val.email(), val.imageUrl(), val.active(),
                 val.phone(), record.getTimezoneId(),
