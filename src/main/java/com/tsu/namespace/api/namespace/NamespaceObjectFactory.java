@@ -82,7 +82,7 @@ public class NamespaceObjectFactory {
 
 
     public UserBase build(UserRecord tb, AppSecurityContext context) {
-        return new UserBaseImpl(tb, bucketService, namespaceDbHelper, context);
+        return new UserBaseImpl(tb, namespaceDbHelper, context);
     }
 
 

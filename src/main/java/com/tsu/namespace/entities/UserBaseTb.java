@@ -29,7 +29,6 @@ public class UserBaseTb {
     @Column(name = "display_name", nullable = false, unique = true)
     private String displayName;
 
-
     @Column(name = "first_name", nullable = true)
     private String firstName;
 
@@ -46,19 +45,11 @@ public class UserBaseTb {
     private String imageUrl;
 
     @Type(JsonbType.class)
-    @Column(name = "profile", columnDefinition = "jsonb")
-    private Jsonb profile;
-
-    @Type(JsonbType.class)
-    @Column(name = "preference", columnDefinition = "jsonb")
-    private Jsonb preference;
+    @Column(name = "preferences", columnDefinition = "jsonb")
+    private Jsonb preferences;
 
     @Column(name = "active", nullable = false)
     private boolean active;
-
-    // Locale and regional settings (nullable - falls back to namespace settings)
-    @Column(name = "currency_code", length = 3)
-    private String currencyCode;  // ISO 4217 override
 
     @Column(name = "language_tag")
     private String languageTag;  // IETF BCP47 override
@@ -69,21 +60,11 @@ public class UserBaseTb {
     @Column(name = "date_pattern")
     private String datePattern;  // Date format override
 
-    @Column(name = "time_pattern")
-    private String timePattern;  // Time format override
-
     @Column(name = "datetime_pattern")
     private String datetimePattern;  // DateTime format override
 
-    // Audit fields
-    @Column(name = "created_by", nullable = false)
-    private UUID createdBy;
-
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
-
-    @Column(name = "modified_by", nullable = false)
-    private UUID modifiedBy;
 
     @Column(name = "modified_date", nullable = false)
     private LocalDateTime modifiedDate;

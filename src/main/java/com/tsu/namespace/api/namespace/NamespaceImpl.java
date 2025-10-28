@@ -41,8 +41,8 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Currency;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -93,7 +93,7 @@ public class NamespaceImpl implements Namespace {
                 entityDbHelper, factory));
         this.permissionManager = new NamespacePermissionManager(namespaceContext, appDbHelper);
         this.placeManager = LazyCacheLoader.of(() -> new NamespacePlaceManager(this, context, placeDbHelper, factory));
-        this.resourceManager = LazyCacheLoader.of(() -> new ResourceManagerImpl(this, context, resourceDbHelper));
+        this.resourceManager = LazyCacheLoader.of(() -> new ResourceManagerImpl(this, context, resourceDbHelper, idGeneratorService));
         this.bookingManager = LazyCacheLoader.of(() -> new BookingManagerImpl(this, context, bookingDbHelper));
         this.calendarManager = LazyCacheLoader.of(() -> new NamespaceCalendarManager(this, context));
         this.textManager = LazyCacheLoader.of(() -> new EntryTextManager(bucket.get().getRoot(), permissionManager));
@@ -290,23 +290,15 @@ public class NamespaceImpl implements Namespace {
     // ========== LocaleSettings Implementation ==========
 
     @Override
-    public Formatter getFormater() {
+    public Formatter getFormatter() {
         return new FormatterImpl(getSettings());
     }
 
-    @Override
-    public void setCurrency(Currency currency) {
-        log.info("Updating currency for namespace ID: {} to '{}'", getId(), currency.getCurrencyCode());
-        getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.SET_NAMESPACE_PROPS, "currency", currency));
-        value.setCurrencyCode(currency.getCurrencyCode());
-        value.persist();
-        log.debug("Currency updated successfully for namespace ID: {}", getId());
-    }
 
     @Override
     public void setLocale(Locale locale) {
         log.info("Updating locale for namespace ID: {} to '{}'", getId(), locale.toLanguageTag());
-        getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.SET_NAMESPACE_PROPS, "locale", locale));
+        getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.SET_NAMESPACE_PROPS, Map.of("locale", locale)));
         value.setLanguageTag(locale.toLanguageTag());
         value.persist();
         log.debug("Locale updated successfully for namespace ID: {}", getId());
@@ -315,7 +307,7 @@ public class NamespaceImpl implements Namespace {
     @Override
     public void setZone(ZoneId zone) {
         log.info("Updating timezone for namespace ID: {} to '{}'", getId(), zone.getId());
-        getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.SET_NAMESPACE_PROPS, "timezone", zone));
+        getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.SET_NAMESPACE_PROPS, Map.of("timezone", zone)));
         value.setTimezoneId(zone.getId());
         value.persist();
         log.debug("Timezone updated successfully for namespace ID: {}", getId());
@@ -324,32 +316,38 @@ public class NamespaceImpl implements Namespace {
     @Override
     public void setDateFormat(String dateFormat) {
         log.info("Updating date format for namespace ID: {} to '{}'", getId(), dateFormat);
-        getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.SET_NAMESPACE_PROPS, "dateFormat", dateFormat));
+        getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.SET_NAMESPACE_PROPS, Map.of("dateFormat", dateFormat)));
         value.setDatePattern(dateFormat);
         value.persist();
         log.debug("Date format updated successfully for namespace ID: {}", getId());
     }
 
-    @Override
-    public void setTimeFormat(String timeFormat) {
-        log.info("Updating time format for namespace ID: {} to '{}'", getId(), timeFormat);
-        getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.SET_NAMESPACE_PROPS, "timeFormat", timeFormat));
-        value.setTimePattern(timeFormat);
-        value.persist();
-        log.debug("Time format updated successfully for namespace ID: {}", getId());
-    }
 
     @Override
     public EffectiveLocaleSettings getSettings() {
-        // Build effective locale settings from namespace settings only (no user fallback at namespace level)
         return new EffectiveLocaleSettingsBuilder()
-            .currencyCode(value.getCurrencyCode())
-            .languageTag(value.getLanguageTag())
-            .timezoneId(value.getTimezoneId())
-            .datePattern(value.getDatePattern())
-            .timePattern(value.getTimePattern())
-            .datetimePattern(value.getDatetimePattern())
-            .build();
+                .languageTag(value.getLanguageTag())
+                .timezoneId(value.getTimezoneId())
+                .datePattern(value.getDatePattern())
+                .datetimePattern(value.getDatetimePattern())
+                .build();
+    }
+
+    @Override
+    public void setSettings(EffectiveLocaleSettings settings) {
+        getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.SET_NAMESPACE_PROPS, Map.of("settings", settings)));
+        value.setLanguageTag(settings.getLanguageTag());
+        value.setTimezoneId(settings.getTimezoneId());
+        value.setDatePattern(settings.dateFormat());
+        value.setDatetimePattern(settings.dateTimeFormat());
+        value.persist();
+    }
+
+    @Override
+    public void setDateTimeFormat(String dateTimeFormat) {
+        getPermissionManager().auditAndCheckPermission(new ActionPack(NamespaceAction.SET_NAMESPACE_PROPS, Map.of("dateTimeFormat", dateTimeFormat)));
+        value.setDatetimePattern(dateTimeFormat);
+        value.persist();
     }
 
 }

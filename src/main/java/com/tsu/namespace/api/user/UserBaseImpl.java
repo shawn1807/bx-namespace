@@ -1,32 +1,30 @@
 package com.tsu.namespace.api.user;
 
-import com.tsu.common.exception.PermissionDeniedException;
-import com.tsu.common.jpa.JsonValueUtils;
-import com.tsu.common.utils.LazyCacheLoader;
-import com.tsu.common.utils.ParamValidator;
-import com.tsu.common.vo.Email;
-import com.tsu.common.vo.Text;
-import com.tsu.entry.api.AclMode;
-import com.tsu.entry.api.EntryBucket;
-import com.tsu.entry.service.BucketService;
+import com.tsu.auth.api.Login;
 import com.tsu.auth.security.AppSecurityContext;
-import com.tsu.enums.BaseConstants;
-import com.tsu.enums.BaseParamName;
+import com.tsu.common.exception.PermissionDeniedException;
 import com.tsu.common.locale.EffectiveLocaleSettings;
 import com.tsu.common.locale.EffectiveLocaleSettingsBuilder;
+import com.tsu.common.utils.LazyCacheLoader;
+import com.tsu.common.utils.ParamValidator;
+import com.tsu.common.val.UserVal;
+import com.tsu.common.vo.Email;
+import com.tsu.common.vo.Text;
+import com.tsu.enums.BaseConstants;
+import com.tsu.enums.BaseParamName;
+import com.tsu.namespace.api.UserBase;
+import com.tsu.namespace.api.UserPreferences;
+import com.tsu.namespace.api.UserProfile;
 import com.tsu.namespace.api.formatter.FormatterImpl;
 import com.tsu.namespace.helper.NamespaceDbHelper;
 import com.tsu.namespace.record.NamespaceRecord;
 import com.tsu.namespace.record.UserRecord;
-import com.tsu.workspace.api.Formatter;
-import com.tsu.auth.api.Login;
-import com.tsu.namespace.api.UserBase;
-import com.tsu.namespace.api.UserProfile;
 import com.tsu.namespace.val.NamespaceVal;
-import com.tsu.common.val.UserVal;
+import com.tsu.workspace.api.Formatter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -39,40 +37,22 @@ public class UserBaseImpl implements UserBase {
     private final AppSecurityContext context;
     private final NamespaceDbHelper namespaceDbHelper;
     private final LazyCacheLoader<List<NamespaceVal>> namespaces;
-    private final LazyCacheLoader<EntryBucket> bucket;
 
-    public UserBaseImpl(UserRecord record, BucketService bucketService, NamespaceDbHelper namespaceDbHelper, AppSecurityContext context) {
+    public UserBaseImpl(UserRecord record, NamespaceDbHelper namespaceDbHelper, AppSecurityContext context) {
         this.record = record;
         this.context = context;
         this.namespaceDbHelper = namespaceDbHelper;
         this.namespaces = LazyCacheLoader.of(() -> namespaceDbHelper.findByPrincipalId(id(), context)
                 .map(NamespaceRecord::getValue)
                 .toList());
-        this.bucket = LazyCacheLoader.of(() -> bucketService.findBucket(record.id().toString(), context.getBucketContext())
-                .orElseGet(() -> bucketService.createBucket(record.id().toString(), BaseConstants.SYSTEM_BUCKET_PROVIDER, context.getBucketContext(), AclMode.FULL))
-        );
     }
 
-
-    @Override
-    public <T extends UserProfile> Optional<T> getProfile(Class<T> type) {
-        return Optional.ofNullable(record.getProfile(type));
-    }
-
-    @Override
-    public <T extends UserProfile> void setProfile(T profile) {
-        log.info("Updating user profile for user ID: {}", record.id());
-        log.debug("Setting profile of type: {}", profile.getClass().getSimpleName());
-        record.setProfile(JsonValueUtils.getInstance().encodeAsJson(profile));
-        record.persist(context);
-        log.debug("User profile updated successfully for user ID: {}", record.id());
-    }
 
     @Override
     public void setName(Text firstName, Text lastName) {
         log.info("Updating name for user ID: {} to '{} {}'", record.id(), firstName.strip(), lastName.strip());
         record.setName(firstName.strip(), lastName.strip());
-        record.persist(context);
+        record.persist();
         log.debug("Name updated successfully for user ID: {}", record.id());
     }
 
@@ -84,7 +64,7 @@ public class UserBaseImpl implements UserBase {
                 .withNonNull(name, BaseParamName.DISPLAY_NAME)
                 .throwIfErrors();
         record.setDisplayName(name.strip());
-        record.persist(context);
+        record.persist();
         log.debug("Display name updated successfully for user ID: {}", record.id());
 
     }
@@ -96,7 +76,7 @@ public class UserBaseImpl implements UserBase {
                 .withVerifyEmail(email)
                 .throwIfErrors();
         record.setEmail(email.toString());
-        record.persist(context);
+        record.persist();
         log.debug("Email updated successfully for user ID: {}", record.id());
     }
 
@@ -107,7 +87,7 @@ public class UserBaseImpl implements UserBase {
                 .withNonNull(phone, BaseParamName.PHONE)
                 .throwIfErrors();
         record.setPhone(phone.strip());
-        record.persist(context);
+        record.persist();
         log.debug("Phone number updated successfully for user ID: {}", record.id());
     }
 
@@ -118,23 +98,15 @@ public class UserBaseImpl implements UserBase {
 
 
     @Override
-    public Map<String, String> getPreference() {
-        return record.getPreference();
+    public UserPreferences getPreference() {
+        return record.getPreferences();
     }
 
+
     @Override
-    public void setPreferences(Map<String, String> preference) {
+    public void setPreferences(UserPreferences preference) {
         record.setPreferences(preference);
-        record.persist(context);
-    }
-
-    @Override
-    public void removePreferences(String... keys) {
-        Map<String, String> preferences = getPreference();
-        Stream.ofNullable(keys)
-                .flatMap(Arrays::stream)
-                .forEach(preferences::remove);
-        setPreferences(preferences);
+        record.persist();
     }
 
 
@@ -146,7 +118,7 @@ public class UserBaseImpl implements UserBase {
             throw new PermissionDeniedException("Permission denied");
         }
         record.setActive(true);
-        record.persist(context);
+        record.persist();
         log.info("User successfully activated: {}", record.id());
     }
 
@@ -156,14 +128,14 @@ public class UserBaseImpl implements UserBase {
             throw new PermissionDeniedException("Permission denied");
         }
         record.setActive(false);
-        record.persist(context);
+        record.persist();
 
     }
 
     @Override
     public void setImageUrl(String url) {
         record.setImageUrl(url);
-        record.persist(context);
+        record.persist();
     }
 
 
@@ -173,8 +145,11 @@ public class UserBaseImpl implements UserBase {
     }
 
     @Override
-    public EntryBucket getBucket() {
-        return bucket.get();
+    public UserProfile toProfile() {
+        UserVal val = record.getValue();
+        return new UserProfile(val.id(), val.displayName(), val.firstName(), val.lastName(), val.email(), val.imageUrl(), val.active(),
+                val.phone(), record.getTimezoneId(),
+                record.getLanguageTag(), record.getDatePattern(), record.getDatetimePattern(), getPreference());
     }
 
     @Override
@@ -191,16 +166,12 @@ public class UserBaseImpl implements UserBase {
 
     @Override
     public Formatter getFormatter() {
-        // Build effective locale settings from user preferences (no namespace fallback at user level)
         EffectiveLocaleSettings localeSettings = new EffectiveLocaleSettingsBuilder()
-            .currencyCode(record.getCurrencyCode())
-            .languageTag(record.getLanguageTag())
-            .timezoneId(record.getTimezoneId())
-            .datePattern(record.getDatePattern())
-            .timePattern(record.getTimePattern())
-            .datetimePattern(record.getDatetimePattern())
-            .build();
-
+                .languageTag(record.getLanguageTag())
+                .timezoneId(record.getTimezoneId())
+                .datePattern(record.getDatePattern())
+                .datetimePattern(record.getDatetimePattern())
+                .build();
         return new FormatterImpl(localeSettings);
     }
 
@@ -219,4 +190,42 @@ public class UserBaseImpl implements UserBase {
         return record.id();
     }
 
+
+    @Override
+    public void setLocale(Locale locale) {
+        record.setLanguageTag(Optional.ofNullable(locale).map(Locale::toLanguageTag).orElse(null));
+        record.persist();
+    }
+
+    @Override
+    public void setZone(ZoneId zone) {
+        record.setTimezoneId(Optional.ofNullable(zone).map(ZoneId::getId).orElse(null));
+        record.persist();
+    }
+
+    @Override
+    public void setDateFormat(String dateFormat) {
+        record.setDatePattern(dateFormat);
+        record.persist();
+    }
+
+    @Override
+    public void setDateTimeFormat(String dateTimeFormat) {
+        record.setDatetimePattern(dateTimeFormat);
+        record.persist();
+    }
+
+    @Override
+    public EffectiveLocaleSettings getSettings() {
+        return EffectiveLocaleSettingsBuilder.build(record.getLanguageTag(), record.getTimezoneId(), record.getDatePattern(), record.getDatetimePattern());
+    }
+
+    @Override
+    public void setSettings(EffectiveLocaleSettings settings) {
+        record.setLanguageTag(settings.getLanguageTag());
+        record.setTimezoneId(settings.getTimezoneId());
+        record.setDatePattern(settings.dateFormat());
+        record.setDatetimePattern(settings.dateTimeFormat());
+        record.persist();
+    }
 }

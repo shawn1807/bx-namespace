@@ -1,17 +1,14 @@
 package com.tsu.namespace.record;
 
-import com.tsu.namespace.api.UserProfile;
-import com.tsu.namespace.entities.UserBaseTb;
-import com.tsu.common.val.UserVal;
 import com.tsu.common.jpa.JsonValueUtils;
 import com.tsu.common.utils.ValueObserver;
-import com.tsu.auth.security.AppSecurityContext;
+import com.tsu.common.val.UserVal;
+import com.tsu.namespace.api.UserPreferences;
+import com.tsu.namespace.entities.UserBaseTb;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -25,13 +22,12 @@ public class UserRecord {
     private final Consumer<UserBaseTb> persist;
     private final ValueObserver<String> nameObserver;
 
-    public void persist(AppSecurityContext context) {
-        tb.setModifiedBy(context.getPrincipal().id());
+    public void persist() {
         tb.setModifiedDate(LocalDateTime.now());
         persist.accept(tb);
     }
 
-    public String getEmail(){
+    public String getEmail() {
         return tb.getEmail();
     }
 
@@ -39,30 +35,24 @@ public class UserRecord {
         return tb.getDisplayName();
     }
 
-    public void setProfile(Object profile) {
-        tb.setProfile(JsonValueUtils.getInstance().encodeAsJson(profile));
+
+    public UserPreferences getPreferences() {
+        return JsonValueUtils.getInstance().decode(tb.getPreferences(), UserPreferences.class);
     }
 
-    public <T extends UserProfile> T getProfile(Class<T> type) {
-        return JsonValueUtils.getInstance().decode(tb.getProfile(), type);
-    }
-
-    public Map<String, String> getPreference() {
-        return JsonValueUtils.getInstance().decode(tb.getPreference());
-    }
-
-    public void setPreferences(Map<String, String> preference) {
-        tb.setPreference(JsonValueUtils.getInstance().encodeAsJson(preference));
+    public void setPreferences(UserPreferences preferences) {
+        tb.setPreferences(JsonValueUtils.getInstance().encodeAsJson(preferences));
     }
 
     public UUID getId() {
         return tb.getId();
     }
 
-    public void setName(String firstName,String lastName) {
+    public void setName(String firstName, String lastName) {
         tb.setFirstName(firstName);
         tb.setLastName(lastName);
     }
+
     public void setDisplayName(String displayName) {
         tb.setDisplayName(displayName);
         nameObserver.updated(displayName);
@@ -86,7 +76,7 @@ public class UserRecord {
     }
 
     public UserVal getValue() {
-        return new UserVal(tb.getId(), tb.getDisplayName(), tb.getFirstName(), tb.getLastName(),tb.getPhone(), tb.getEmail(), tb.getImageUrl());
+        return new UserVal(tb.getId(), tb.getDisplayName(), tb.getFirstName(), tb.getLastName(), tb.getPhone(), tb.getEmail(), tb.getImageUrl(), tb.isActive());
     }
 
     public boolean isActive() {
@@ -101,15 +91,6 @@ public class UserRecord {
         tb.setImageUrl(url);
     }
 
-    // ========== Locale Settings ==========
-
-    public String getCurrencyCode() {
-        return tb.getCurrencyCode();
-    }
-
-    public void setCurrencyCode(String currencyCode) {
-        tb.setCurrencyCode(currencyCode);
-    }
 
     public String getLanguageTag() {
         return tb.getLanguageTag();
@@ -133,14 +114,6 @@ public class UserRecord {
 
     public void setDatePattern(String datePattern) {
         tb.setDatePattern(datePattern);
-    }
-
-    public String getTimePattern() {
-        return tb.getTimePattern();
-    }
-
-    public void setTimePattern(String timePattern) {
-        tb.setTimePattern(timePattern);
     }
 
     public String getDatetimePattern() {

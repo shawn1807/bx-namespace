@@ -67,10 +67,6 @@ public class NamespaceTb {
     @Column(name = "access_level")
     private AccessLevel accessLevel;
 
-    // Locale and regional settings
-    @Column(name = "currency_code", length = 3)
-    private String currencyCode;  // ISO 4217 (USD, EUR, TWD, etc.)
-
     @Column(name = "language_tag")
     private String languageTag;  // IETF BCP47 (en-US, zh-TW, ja-JP, etc.)
 
@@ -79,9 +75,6 @@ public class NamespaceTb {
 
     @Column(name = "date_pattern")
     private String datePattern;  // Java DateTimeFormatter pattern (yyyy-MM-dd, MM/dd/yyyy, etc.)
-
-    @Column(name = "time_pattern")
-    private String timePattern;  // Java DateTimeFormatter pattern (HH:mm, hh:mm a, etc.)
 
     @Column(name = "datetime_pattern")
     private String datetimePattern;  // Java DateTimeFormatter pattern

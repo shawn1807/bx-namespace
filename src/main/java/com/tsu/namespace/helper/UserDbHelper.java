@@ -45,7 +45,7 @@ public class UserDbHelper {
 
     }
 
-    public UserRecord register(String displayName, String email, String phone, String imageUrl, String firstName, String lastName, Object profile, Object preference) {
+    public UserRecord register(String displayName, String email, String phone, String imageUrl, String firstName, String lastName, Object preference) {
         BasePrincipal base = createBasePrincipal(displayName, PrincipalType.USER);
         UserBaseTb e = new UserBaseTb();
         e.setId(base.id());
@@ -56,21 +56,18 @@ public class UserDbHelper {
         e.setFirstName(firstName);
         e.setLastName(lastName);
         e.setImageUrl(imageUrl);
-        e.setProfile(JsonValueUtils.getInstance().encodeAsJson(profile));
-        e.setPreference(JsonValueUtils.getInstance().encodeAsJson(preference));
+        e.setPreferences(JsonValueUtils.getInstance().encodeAsJson(preference));
         e.setCreatedDate(LocalDateTime.now());
-        e.setCreatedBy(base.id());
-        e.setModifiedBy(base.id());
         e.setModifiedDate(LocalDateTime.now());
         userRepository.save(e);
         return buildUserRecord(e);
     }
 
-    public UserRecord addUser(String name, String email, String phone, Object profile, UUID createdBy) {
-        return addUser(name, email, phone, null, profile, null, createdBy);
+    public UserRecord addUser(String name, String email, String phone) {
+        return addUser(name, email, phone, null);
     }
 
-    public UserRecord addUser(String name, String email, String phone, String imageUrl, Object profile, Object preference, UUID createdBy) {
+    public UserRecord addUser(String name, String email, String phone, String imageUrl) {
         BasePrincipal base = createBasePrincipal(name, PrincipalType.USER);
         UserBaseTb e = new UserBaseTb();
         e.setId(base.id());
@@ -79,11 +76,7 @@ public class UserDbHelper {
         e.setPhone(phone);
         e.setEmail(email);
         e.setImageUrl(imageUrl);
-        e.setProfile(JsonValueUtils.getInstance().encodeAsJson(profile));
-        e.setPreference(JsonValueUtils.getInstance().encodeAsJson(preference));
         e.setCreatedDate(LocalDateTime.now());
-        e.setCreatedBy(createdBy);
-        e.setModifiedBy(createdBy);
         e.setModifiedDate(LocalDateTime.now());
         userRepository.save(e);
         return buildUserRecord(e);
