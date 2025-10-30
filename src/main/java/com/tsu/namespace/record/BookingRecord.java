@@ -16,7 +16,7 @@ import java.util.UUID;
  */
 @ToString(onlyExplicitlyIncluded = true)
 @RequiredArgsConstructor
-public class BookingRecord implements Booking {
+public class BookingRecord{
 
     @ToString.Include
     private final BookingTb tb;
@@ -33,82 +33,82 @@ public class BookingRecord implements Booking {
                 tb.getEndAt(),
                 tb.getTitle(),
                 tb.getNotes(),
-                tb.getCreatedAt(),
+                tb.getCreatedDate(),
                 tb.getCreatedBy(),
-                tb.getUpdatedAt(),
-                tb.getUpdatedBy(),
-                tb.getDeletedAt()
+                tb.getModifiedDate(),
+                tb.getModifiedBy(),
+                tb.getDeletedDate()
         );
     }
 
-    @Override
+   
     public UUID getNamespaceId() {
         return tb.getId().getNamespaceId();
     }
 
-    @Override
+   
     public UUID getId() {
         return tb.getId().getId();
     }
 
-    @Override
+   
     public UUID getResourceId() {
         return tb.getResourceId();
     }
 
-    @Override
+   
     public UUID getUserId() {
         return tb.getUserId();
     }
 
-    @Override
+   
     public BookingStatus getStatus() {
         return tb.getStatus();
     }
 
-    @Override
+   
     public LocalDateTime getStartAt() {
         return tb.getStartAt();
     }
 
-    @Override
+   
     public LocalDateTime getEndAt() {
         return tb.getEndAt();
     }
 
-    @Override
+   
     public String getTitle() {
         return tb.getTitle();
     }
 
-    @Override
+   
     public String getNotes() {
         return tb.getNotes();
     }
 
-    @Override
-    public LocalDateTime getCreatedAt() {
-        return tb.getCreatedAt();
+   
+    public LocalDateTime getCreatedDate() {
+        return tb.getCreatedDate();
     }
 
-    @Override
+   
     public UUID getCreatedBy() {
         return tb.getCreatedBy();
     }
 
-    @Override
-    public LocalDateTime getUpdatedAt() {
-        return tb.getUpdatedAt();
+   
+    public LocalDateTime getModifiedDate() {
+        return tb.getModifiedDate();
     }
 
-    @Override
-    public UUID getUpdatedBy() {
-        return tb.getUpdatedBy();
+   
+    public UUID getModifiedBy() {
+        return tb.getModifiedBy();
     }
 
-    @Override
+   
     public LocalDateTime getDeletedAt() {
-        return tb.getDeletedAt();
+        return tb.getDeletedDate();
     }
 
     // Setters for mutable fields
@@ -134,6 +134,6 @@ public class BookingRecord implements Booking {
     }
 
     public void setDeletedAt(LocalDateTime deletedAt) {
-        tb.setDeletedAt(deletedAt);
+        tb.setDeletedDate(deletedAt);
     }
 }

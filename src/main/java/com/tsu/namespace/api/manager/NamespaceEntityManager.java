@@ -1,8 +1,10 @@
 package com.tsu.namespace.api.manager;
 
+import com.tsu.entry.api.EntryCustomType;
 import com.tsu.enums.BaseCustomType;
 import com.tsu.enums.BaseExceptionCode;
 import com.tsu.enums.BaseParamName;
+import com.tsu.enums.NamespaceNodeType;
 import com.tsu.namespace.api.Entity;
 import com.tsu.namespace.api.EntityManager;
 import com.tsu.namespace.api.EntityType;
@@ -73,7 +75,7 @@ public class NamespaceEntityManager implements EntityManager {
         if (entityDbHelper.findEntityByNamespaceIdAndNameAndTypeId(namespace.getId(), request.getName().strip(), type.getId(), context).isPresent()) {
             throw new UserException(BaseExceptionCode.ENTITY_EXISTS, Map.of(BaseParamName.NAME, request.getName(), BaseParamName.TYPE, request.getType()));
         }
-        Node node = namespace.getNode().addNode(BaseCustomType.ENTITY);
+        Node node = namespace.getNode().addNode(NamespaceNodeType.ENTITY);
         UUID parentId = Optional.ofNullable(request.getParentId())
                 .flatMap(this::findEntity)
                 .map(Entity::getId)

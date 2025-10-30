@@ -1,6 +1,7 @@
 package com.tsu.namespace.api.manager;
 
 import com.tsu.auth.permissions.BookingPermission;
+import com.tsu.auth.permissions.NamespaceAction;
 import com.tsu.auth.security.AppSecurityContext;
 import com.tsu.common.api.ActionPack;
 import com.tsu.namespace.api.*;
@@ -32,12 +33,12 @@ public class BookingManagerImpl implements BookingManager {
 
     @Override
     public Booking createBooking(UUID resourceId, UUID userId, LocalDateTime startAt,
-                                LocalDateTime endAt, String title, String notes, BookingStatus status) {
+                                 LocalDateTime endAt, String title, String notes, BookingStatus status) {
         log.debug("Creating booking: resourceId={}, userId={}, start={}, end={}",
                 resourceId, userId, startAt, endAt);
 
         namespace.getPermissionManager().auditAndCheckPermission(
-                new ActionPack(BookingPermission.CREATE, Map.of(
+                new ActionPack(NamespaceAction.CREATE_BOOKING, Map.of(
                         "resourceId", resourceId,
                         "userId", userId,
                         "startAt", startAt,
@@ -127,7 +128,7 @@ public class BookingManagerImpl implements BookingManager {
 
     @Override
     public Booking updateBooking(UUID bookingId, LocalDateTime startAt, LocalDateTime endAt,
-                                String title, String notes) {
+                                 String title, String notes) {
         log.debug("Updating booking: {}", bookingId);
 
         // Check if user owns the booking
@@ -234,7 +235,7 @@ public class BookingManagerImpl implements BookingManager {
 
     @Override
     public BookingHold createHold(UUID resourceId, UUID userId, LocalDateTime startAt,
-                                 LocalDateTime endAt, LocalDateTime expiresAt) {
+                                  LocalDateTime endAt, LocalDateTime expiresAt) {
         log.debug("Creating booking hold: resourceId={}, userId={}", resourceId, userId);
 
         namespace.getPermissionManager().auditAndCheckPermission(
@@ -292,7 +293,7 @@ public class BookingManagerImpl implements BookingManager {
 
     @Override
     public BookingWaitlist addToWaitlist(UUID resourceId, UUID userId, LocalDateTime desiredStart,
-                                        LocalDateTime desiredEnd, Integer priority) {
+                                         LocalDateTime desiredEnd, Integer priority) {
         log.debug("Adding to waitlist: resourceId={}, userId={}", resourceId, userId);
 
         namespace.getPermissionManager().auditAndCheckPermission(
