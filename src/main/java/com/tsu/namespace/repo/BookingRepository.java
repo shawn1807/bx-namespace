@@ -3,6 +3,7 @@ package com.tsu.namespace.repo;
 import com.tsu.namespace.entities.BookingTb;
 import com.tsu.namespace.entities.id.BookingId;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +13,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @Repository
-public interface BookingRepository extends JpaRepository<BookingTb, BookingId> {
+public interface BookingRepository extends JpaRepository<BookingTb, BookingId>, JpaSpecificationExecutor<BookingTb> {
 
     /**
      * Find a specific booking by namespace and ID
